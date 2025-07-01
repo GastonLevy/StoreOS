@@ -1,0 +1,181 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<style>
+    .timer-expired {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Dispositivos</h2>
+    <div class="row">
+        {% for device in devices %}
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ device.name }}</h5>
+                    <form class="add-time-form" data-device-id="{{ device.id }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="current_time" id="current-time-{{ device.id }}" value="{{ now|date:'U' }}">
+
+                        <label for="duration-{{ device.id }}">Duración (en minutos):</label>
+                        <input type="number" class="form-control" id="duration-{{ device.id }}" name="duration" required>
+
+                        <label for="client-{{ device.id }}">Cliente:</label>
+                        <select class="form-control" id="client-{{ device.id }}" name="client_id">
+                            <option value="" {% if not device.client %}selected{% endif %}>Seleccionar cliente</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}" {% if device.client and device.client.id == client.id %}selected{% endif %}>
+                                {{ client.first_name }} {{ client.last_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="submit" class="btn btn-primary btn-add-time">Agregar tiempo</button>
+                        <button type="button" class="btn btn-danger btn-end-session" data-device-id="{{ device.id }}">Terminar sesión</button>
+                    </form>
+
+                    <div class="alert alert-success mt-2 d-none" id="success-msg-{{ device.id }}"></div>
+                    <div class="alert alert-danger mt-2 d-none" id="error-msg-{{ device.id }}"></div>
+
+                    <div id="timer-{{ device.id }}" class="mt-2" data-end-time="{{ device.remaining_time_seconds }}">
+                        <p><strong>Tiempo restante:</strong> <span id="remaining-time-{{ device.id }}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Función para sincronizar todos los tiempos con el servidor
+    function syncAllTimesWithServer() {
+        const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+        const currentTime = Math.floor(Date.now() / 1000);  // Obtener tiempo actual en segundos
+
+        fetch(`/cyber_control/get_all_remaining_times/?current_time=${currentTime}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.device_times) {
+                    data.device_times.forEach(device => {
+                        updateRemainingTime(device.device_id, device.remaining_time_seconds);
+                    });
+                }
+            })
+            .catch(err => console.error('Error al sincronizar los tiempos:', err));
+    }
+
+    // Función para actualizar el tiempo restante de un dispositivo específico
+    function updateRemainingTime(deviceId, remainingTime) {
+        const timer = document.querySelector(`#timer-${deviceId}`);
+        const timerText = document.getElementById(`remaining-time-${deviceId}`);
+        timer.setAttribute('data-end-time', remainingTime);
+
+        if (remainingTime > 0) {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            timerText.textContent = `${minutes} minutos y ${seconds} segundos`;
+        } else {
+            timerText.textContent = "Sin tiempo asignado";
+        }
+    }
+
+    // Sincronizar todos los dispositivos con el servidor cada 60 segundos
+    setInterval(syncAllTimesWithServer, 30000);  // 1 minuto
+
+    // Función para actualizar el tiempo local de todos los dispositivos
+    function updateLocalTimer() {
+        document.querySelectorAll('[id^="timer-"]').forEach(timer => {
+            let remainingTime = parseInt(timer.getAttribute('data-end-time'), 10);
+            const timerText = timer.querySelector('span');
+
+            if (remainingTime > 0) {
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                timerText.textContent = `${minutes} minutos y ${seconds} segundos`;
+                timer.setAttribute('data-end-time', remainingTime - 1);
+            } else {
+                timerText.textContent = "Tiempo expirado";
+            }
+        });
+    }
+
+    // Actualizar el contador local cada segundo
+    setInterval(updateLocalTimer, 1000);  // Cada segundo actualiza el contador local
+
+    // Agregar el tiempo a un dispositivo
+    document.querySelectorAll('.add-time-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const deviceId = form.dataset.deviceId;
+            const duration = parseInt(form.querySelector(`#duration-${deviceId}`).value, 10);
+            const clientId = form.querySelector(`#client-${deviceId}`).value;
+            const currentTime = Math.floor(Date.now() / 1000);
+
+            if (isNaN(duration) || duration <= 0) {
+                alert("Por favor, ingresa una duración válida.");
+                return;
+            }
+
+            const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+            const formData = new FormData();
+            formData.append('duration', duration);
+            formData.append('client_id', clientId);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+            formData.append('current_time', currentTime);
+
+            fetch(`/cyber_control/add_time/${deviceId}/`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateRemainingTime(deviceId, data.remaining_seconds);
+                    } else if (data.error) {
+                        alert(data.error);
+                    }
+                })
+                .catch(err => console.error('Error al agregar tiempo:', err));
+        });
+    });
+
+    // Terminar sesión de un dispositivo
+    document.querySelectorAll('.btn-end-session').forEach(button => {
+        button.addEventListener('click', function () {
+            const deviceId = button.dataset.deviceId;
+
+            if (confirm('¿Estás seguro de que deseas terminar la sesión?')) {
+                const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', csrfToken);
+
+                fetch(`/cyber_control/end_session/${deviceId}/`, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateRemainingTime(deviceId, 0);
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(err => console.error('Error al terminar la sesión:', err));
+            }
+        });
+    });
+</script>
+
+{% endblock %}

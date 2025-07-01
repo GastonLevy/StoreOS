@@ -1,0 +1,456 @@
+<!-- templates/checkout/cart_detail.html -->
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if not cart.is_completed %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <form method="post" action="{% url 'cart-empty' cart.id %}" id="empty-cart-form">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-danger btn-sm" id="empty-cart-btn"
+                        onclick="confirmEmptyCart()">Borrar todo</button>
+                    <button type="submit" class="btn btn-danger btn-sm" id="confirm-empty-cart-btn" style="display: none;">
+                        Se eliminará toda la información de este carrito.
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-group mb-3">
+                <div class="form-check form-check-inline">
+                    <input type="radio" class="form-check-input" id="search-product" name="product_type_radio" value="search" checked onclick="toggleForm()">
+                    <label class="form-check-label" for="search-product">Buscar producto</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input type="radio" class="form-check-input" id="temp-product" name="product_type_radio" value="temp" onclick="toggleForm()">
+                    <label class="form-check-label" for="temp-product">Producto Temporal</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input type="radio" class="form-check-input" id="deferred-product" name="product_type_radio" value="deferred" onclick="toggleForm()">
+                    <label class="form-check-label" for="deferred-product">Precio Diferido</label>                    
+                </div>                
+            </div>
+
+            <form method="post" autocomplete="off" action="{% url 'cart-detail' cart.id %}" id="search-form">
+                {% csrf_token %}
+                <div class="d-flex align-items-center mb-4" style="position: relative;">
+                    <input type="text" id="item-search" name="item" class="form-control"
+                           placeholder="Buscar por nombre o código de barras" required>
+                    <input type="hidden" id="item-id" name="item_id">
+                    
+                    <!-- El listado de resultados tiene posición absoluta -->
+                    <ul id="autocomplete-results" class="list-group" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 10; display: none;"></ul>
+                </div>
+                
+
+                <div class="form-group mb-3">
+                    <label for="quantity">Cantidad</label>
+                    {{ form.quantity }}
+                </div>
+                <button type="submit" class="btn btn-primary">Añadir al Carrito</button>
+            </form>
+
+            <form method="post" action="{% url 'cart-detail' cart.id %}" id="temp-form" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="hide" value="true">
+                <div class="form-group mb-3">
+                    <label for="temp-name">Nombre de Producto</label>
+                    <input type="text" id="temp-name" name="temp_name" class="form-control" placeholder="Nombre del producto temporal">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="temp-price">Precio</label>
+                    <input type="number" id="temp-price" name="temp_price" class="form-control" step="0.01" placeholder="Precio del producto temporal">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="temp-quantity">Cantidad</label>
+                    <input type="number" id="temp-quantity" name="temp_quantity" class="form-control" step="0.0001" placeholder="Cantidad del producto temporal">
+                </div>
+                <button type="submit" class="btn btn-primary">Añadir al Carrito</button>
+            </form>
+            
+            <form method="post" autocomplete="off" action="{% url 'cart-detail' cart.id %}" id="deferred-form" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="deferred_price" value="true"> <!-- Agregar este campo -->
+                
+                <div class="d-flex align-items-center mb-4" style="position: relative;">
+                    <input type="text" id="deferred-item-search" name="item" class="form-control"
+                           placeholder="Buscar por nombre o código de barras" required>
+                    <input type="hidden" id="deferred-item-id" name="item_id">
+                    <!-- Resultados de autocompletado -->
+                    <ul id="deferred-autocomplete-results" class="list-group" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 10; display: none;"></ul>
+                </div>
+            
+                <div class="form-group mb-3">
+                    <label for="deferred-quantity">Cantidad</label>
+                    <input type="number" id="deferred-quantity" name="quantity" class="form-control" step="1" placeholder="Cantidad" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="deferred-price">Precio</label>
+                    <input type="number" id="deferred-price" name="price" class="form-control" step="0.01" placeholder="Precio" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Añadir al Carrito</button>
+            </form>                               
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Detalles del carrito -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-shopping-cart me-1"></i> Productos en el Carrito
+                </div>
+                {% if cart.is_completed %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Método de Pago: {{ cart.payment_method.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="font-weight-bold">Total General: ${{ total_general|floatformat:2 }}</p>
+                            {% if cart.payment_method.name == "Efectivo" %}
+                                <p class="font-weight-bold">Vuelto: ${{ cart.payment_return|floatformat:2 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if not cart.is_completed %}
+                <form method="post" action="{% url 'cart-finalize' cart.id %}" id="finalize-cart-form" class="d-flex align-items-center gap-2 flex-wrap">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="payment-method" class="form-label">Método de Pago</label>
+                        <select name="payment_method" id="payment-method" class="form-control" required>
+                            {% for method in payment_methods %}
+                                <option value="{{ method.id }}" {% if method.name == "Efectivo" %}selected{% endif %}>{{ method.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="cash-payment-fields" style="display: {% if payment_methods.0.name == 'Efectivo' %}block{% else %}none{% endif %};">
+                        <label for="paid-amount" class="form-label">Paga con</label>
+                        <input type="number" step="0.01" name="paid_amount" id="paid-amount" class="form-control" placeholder="Cantidad pagada">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="person" class="form-label">Cliente (Opcional)</label>
+                        <select name="person" id="person" class="form-control">
+                            <option value="" selected>-</option>
+                            {% for person in persons %}
+                                <option value="{{ person.id }}">{{ person.first_name }} {{ person.last_name }}</option>
+                            {% empty %}
+                                <option value="" disabled>No hay personas disponibles</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="border p-3 rounded bg-light" style="min-height: 100px;">
+                        <button type="button" class="btn btn-success btn-sm w-100" id="finalize-cart-btn" onclick="confirmFinalizeCart()" disabled>
+                            Cobrar. (${{ total_general|floatformat:2 }})
+                        </button>
+                        <div id="cash-payment-fields-finalize" style="display: {% if payment_methods.0.name == 'Efectivo' %}block{% else %}none{% endif %};">
+                            <div class="mt-4" style="visibility: {% if payment_methods.0.name == 'Efectivo' and change_amount != 0 %}visible{% else %}hidden{% endif %};">
+                                <label for="change-amount" class="form-label">Vuelto</label>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span id="change-amount" class="text-muted">-</span>
+                                    <span class="badge bg-primary" id="vuelto-badge">{{ change_amount|floatformat:2 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                
+
+                    <button type="submit" class="btn btn-success btn-sm" id="confirm-finalize-cart-btn" style="display: none;" disabled>
+                        Realizar la transacción. (${{ total_general|floatformat:2 }})
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'cart-list' %}" class="btn btn-primary">Volver a la lista</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Total</th>
+                            {% if not cart.is_completed %}
+                            <th>Acciones</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody id="cart-body">
+                        {% for line in cart_lines %}
+                        <tr>
+                            <td>{{ line.name }}</td>
+                            <td>{{ line.quantity }}</td>
+                            <td>${{ line.price|floatformat:2 }}</td>
+                            <td>${{ line.total|floatformat:2 }}</td>
+                            {% if not cart.is_completed %}
+                            <td>
+                                <form method="post" action="{% url 'delete-cart-line' cart.id line.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No hay productos en el carrito</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end font-weight-bold">Total General</td>
+                            <td class="font-weight-bold">${{ total_general|floatformat:2 }}</td>
+                            {% if not cart.is_completed %}
+                            <td></td>
+                            {% endif %}
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir jQuery antes de tu script personalizado -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // Muestra el botón de confirmación y oculta el original
+    function confirmEmptyCart() {
+        document.getElementById('empty-cart-btn').style.display = 'none';  // Ocultar el botón original
+        const confirmButton = document.getElementById('confirm-empty-cart-btn');
+        confirmButton.style.display = 'inline-block';  // Mostrar el botón de confirmación
+        confirmButton.disabled = true;  // Deshabilitar el botón de confirmación inmediatamente
+
+        // Espera 1.5 segundos y habilita el botón de confirmación
+        setTimeout(function () {
+            confirmButton.disabled = false;  // Habilitar el botón de confirmación
+        }, 2000);  // Esperar 2.0 segundos
+    }
+
+    // Muestra el botón de confirmación y oculta el original para Finalizar Carrito
+    function confirmFinalizeCart() {
+        document.getElementById('finalize-cart-btn').style.display = 'none';  // Ocultar el botón original
+        const confirmButton = document.getElementById('confirm-finalize-cart-btn');
+        confirmButton.style.display = 'inline-block';  // Mostrar el botón de confirmación
+        confirmButton.disabled = true;  // Deshabilitar el botón de confirmación inmediatamente
+
+        // Espera 1.5 segundos y habilita el botón de confirmación
+        setTimeout(function () {
+            confirmButton.disabled = false;  // Habilitar el botón de confirmación
+        }, 2000);  // Esperar 2.0 segundos
+    }
+</script>
+
+<script>
+$(document).ready(function () {
+    const inputField = $('#item-search');
+    const resultsList = $('#autocomplete-results');
+    const itemIdField = $('#item-id');  // Campo oculto para el ID
+    const form = inputField.closest('form'); // Formulario contenedor
+
+    inputField.on('keyup', function (e) {
+        e.preventDefault();  // Evita que la página se desplace al escribir
+
+        const query = $(this).val();
+
+        if (query.length > 2) {  // Buscar si hay al menos 3 caracteres
+            $.ajax({
+                url: '{% url "item-search" %}',  // Asegúrate de que la URL está bien configurada
+                data: { q: query },
+                dataType: 'json',
+                success: function (data) {
+                    resultsList.empty();  // Limpiar la lista de resultados
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            resultsList.append(`
+                                <li class="list-group-item list-group-item-action" data-id="${item.id}">
+                                    ${item.name} (${item.barcode}) - $${item.price.toFixed(2)}
+                                </li>
+                            `);
+                        });
+                        resultsList.show();  // Mostrar resultados sin desplazamiento
+                    } else {
+                        resultsList.append('<li class="list-group-item disabled">Sin resultados</li>');
+                        resultsList.show();  // Mostrar resultados sin desplazamiento
+                    }
+                }
+            });
+        } else {
+            resultsList.hide();  // Ocultar resultados cuando el texto es insuficiente
+        }
+    });
+
+    resultsList.on('click', 'li', function () {
+        const selectedItem = $(this).text().trim(); // Elimina espacios
+        const selectedId = $(this).data('id');      // Obtiene el ID del ítem
+
+        inputField.val(selectedItem);              // Coloca el texto en el campo de búsqueda
+        itemIdField.val(selectedId);               // Asigna el ID al campo oculto
+        resultsList.hide(); // Ocultar el listado cuando se selecciona un item
+    });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#item-search, #autocomplete-results').length) {
+            resultsList.hide();  // Ocultar el listado si se hace clic fuera
+        }
+    });
+
+    // Enviar el formulario al presionar Enter
+    inputField.on('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Evita el envío por defecto
+            form.submit();
+        }
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const paymentMethodSelect = document.getElementById('payment-method');
+    const cashFields = document.getElementById('cash-payment-fields');
+    const paidAmountInput = document.getElementById('paid-amount');
+    const changeAmountSpan = document.getElementById('change-amount');  // Cambié de 'change-amount-input' a 'change-amount'
+    const finalizeCartBtn = document.getElementById('finalize-cart-btn');
+    const confirmFinalizeCartBtn = document.getElementById('confirm-finalize-cart-btn');
+    const total = {{ total_general|floatformat:2 }};
+
+    // Mostrar/Ocultar campos según método de pago
+    function toggleCashFields() {
+        const cashFieldsFinalize = document.getElementById('cash-payment-fields-finalize');
+        
+        if (paymentMethodSelect.options[paymentMethodSelect.selectedIndex].text === 'Efectivo') {
+            cashFields.style.display = 'block';
+            cashFieldsFinalize.style.display = 'block'; // Asegúrate de que ambos estén visibles
+        } else {
+            cashFields.style.display = 'none';
+            cashFieldsFinalize.style.display = 'none';
+            paidAmountInput.value = '';  // Limpiar valor pagado
+            changeAmountSpan.textContent = '-';  // Limpiar vuelto
+        }
+    }
+
+    // Llamar a toggleCashFields al cargar la página para asegurar que se muestre/oculte correctamente
+    toggleCashFields();
+
+    paymentMethodSelect.addEventListener('change', function () {
+        toggleCashFields();  // Muestra/oculta campos según el método de pago seleccionado
+        // Habilitar/Deshabilitar el botón "Cobrar" si no es efectivo
+        if (paymentMethodSelect.options[paymentMethodSelect.selectedIndex].text !== 'Efectivo') {
+            finalizeCartBtn.disabled = false;
+            confirmFinalizeCartBtn.disabled = false;
+        }
+    });
+
+    // Calcular vuelto y habilitar los botones si el monto pagado es suficiente
+    paidAmountInput.addEventListener('input', function () {
+        const paidAmount = parseFloat(paidAmountInput.value) || 0;
+        const change = paidAmount - total;
+        
+        // Actualiza el contenido de 'change-amount' con el vuelto calculado
+        changeAmountSpan.textContent = change >= 0 ? change.toFixed(2) : 'Insuficiente';
+
+        // Habilita o deshabilita los botones solo si el método de pago es efectivo
+        if (paymentMethodSelect.options[paymentMethodSelect.selectedIndex].text === 'Efectivo') {
+            if (paidAmount >= total) {
+                finalizeCartBtn.disabled = false;
+                confirmFinalizeCartBtn.disabled = false;
+            } else {
+                finalizeCartBtn.disabled = true;
+                confirmFinalizeCartBtn.disabled = true;
+            }
+        }
+    });
+});
+</script>
+
+<script>
+    $(document).ready(function () {
+    const deferredInput = $('#deferred-item-search');
+    const deferredResults = $('#deferred-autocomplete-results');
+    const deferredItemId = $('#deferred-item-id');
+
+    deferredInput.on('keyup', function (e) {
+        e.preventDefault();
+        const query = $(this).val();
+
+        if (query.length > 2) {
+            $.ajax({
+                url: '{% url "item-search" %}', 
+                data: { q: query },
+                dataType: 'json',
+                success: function (data) {
+                    deferredResults.empty();
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            deferredResults.append(`
+                                <li class="list-group-item list-group-item-action" data-id="${item.id}">
+                                    ${item.name} (${item.barcode}) - $${item.price.toFixed(2)}
+                                </li>
+                            `);
+                        });
+                        deferredResults.show();
+                    } else {
+                        deferredResults.append('<li class="list-group-item disabled">Sin resultados</li>');
+                        deferredResults.show();
+                    }
+                }
+            });
+        } else {
+            deferredResults.hide();
+        }
+    });
+
+    deferredResults.on('click', 'li', function () {
+        const selectedText = $(this).text().trim();
+        const selectedId = $(this).data('id');
+
+        deferredInput.val(selectedText);
+        deferredItemId.val(selectedId);
+        deferredResults.hide();
+    });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#deferred-item-search, #deferred-autocomplete-results').length) {
+            deferredResults.hide();
+        }
+    });
+});
+</script>
+
+<script>
+    function toggleForm() {
+        var searchForm = document.getElementById('search-form');
+        var tempForm = document.getElementById('temp-form');
+        var deferredForm = document.getElementById('deferred-form');
+        
+        if (document.getElementById('search-product').checked) {
+            searchForm.style.display = 'block';
+            tempForm.style.display = 'none';
+            deferredForm.style.display = 'none';
+        } else if (document.getElementById('temp-product').checked) {
+            searchForm.style.display = 'none';
+            tempForm.style.display = 'block';
+            deferredForm.style.display = 'none';
+        } else if (document.getElementById('deferred-product').checked) {
+            searchForm.style.display = 'none';
+            tempForm.style.display = 'none';
+            deferredForm.style.display = 'block';
+        }
+    }
+</script>
+
+
+{% endblock %}

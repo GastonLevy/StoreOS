@@ -1,0 +1,5 @@
+from .open_cash_register_view import open_cash_register_view
+from .close_cash_register_view import close_cash_register_view
+from .list_cash_register_view import cash_register_list_view
+from .detail_cash_register_view import cash_register_detail_view
+from .create_cash_register_movement_view import cash_movement_create

@@ -1,0 +1,44 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Error{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 text-danger">
+            {% if code == 404 %}
+                <i class="fas fa-exclamation-triangle"></i> ¡Vaya! Página no encontrada.
+            {% elif code == 500 %}
+                <i class="fas fa-server"></i> ¡Ups! Algo salió mal en el servidor.
+            {% elif code == 403 %}
+                <i class="fas fa-ban"></i> Acceso denegado.
+            {% elif code == 400 %}
+                <i class="fas fa-times-circle"></i> Solicitud incorrecta.
+            {% else %}
+                <i class="fas fa-question-circle"></i> Error desconocido.
+            {% endif %}
+        </h1>
+        
+        <p class="lead">
+            {% if code == 404 %}
+                La página que buscas no existe. Tal vez se haya movido o haya sido eliminada.
+            {% elif code == 500 %}
+                Estamos trabajando para solucionarlo. Por favor, intenta nuevamente más tarde.
+            {% elif code == 403 %}
+                No tienes permisos para acceder a esta página.
+            {% elif code == 400 %}
+                La solicitud que has hecho no es válida.
+            {% else %}
+                Algo inesperado ocurrió. Por favor, intenta más tarde.
+            {% endif %}
+        </p>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

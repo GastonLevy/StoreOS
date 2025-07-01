@@ -1,0 +1,94 @@
+{% extends 'index.html' %}
+
+{% block title %} {% if entry %}Editar{% else %}Crear{% endif %} Entrada en Wiki{% endblock %}
+
+{% block content %}
+<!-- Incluir el CDN de CKEditor -->
+<script src="https://cdn.ckeditor.com/ckeditor5/38.1.0/classic/ckeditor.js"></script>
+
+<script>
+    // Inicializar CKEditor para el campo 'content' al cargar la página
+    document.addEventListener('DOMContentLoaded', function () {
+        ClassicEditor
+            .create(document.querySelector('#id_content'))
+            .catch(error => {
+                console.error(error);
+            });
+    });
+</script>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-light">
+                <div class="card-header bg-light text-dark">
+                    {% if entry %}
+                    <i class="fas fa-edit me-1"></i> Editar Entrada en Wiki
+                    {% else %}
+                    <i class="fas fa-plus-circle me-1"></i> Crear Nueva Entrada en Wiki
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h4 class="text-center font-weight-light my-4">
+                        {% if entry %}Editar{% else %}Crear{% endif %} Entrada
+                    </h4>
+
+                    <!-- Mensajes de error generales -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>¡Algo salió mal!</strong> Hay errores en el formulario:
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Campo Título -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control {% if form.title.errors %}is-invalid{% endif %}" id="title" name="title" value="{{ form.title.value|default_if_none:'' }}" required>
+                            <label for="title">Título</label>
+                            {% for error in form.title.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Contenido (Con CKEditor) -->
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control {% if form.content.errors %}is-invalid{% endif %}" id="id_content" name="content" style="height: 200px;">{{ form.content.value|default_if_none:'' }}</textarea>
+                            {% for error in form.content.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Categoría -->
+                        <div class="form-floating mb-3">
+                            <select class="form-control {% if form.category.errors %}is-invalid{% endif %}" id="category" name="category">
+                                <option value="{{ category.id }}" selected>{{ category.name }}</option>
+                            </select>
+                            <label for="category">Categoría</label>
+                            {% for error in form.category.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <a href="{% url 'wiki_category-detail' category.id %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if entry %}Guardar Cambios{% else %}Crear Entrada{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

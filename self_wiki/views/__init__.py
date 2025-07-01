@@ -1,0 +1,13 @@
+from .wiki_category.wiki_category_create_view import add_wiki_category
+from .wiki_category.wiki_category_list_view import wiki_category_list
+from .wiki_category.wiki_category_update_view import edit_wiki_category
+from .wiki_category.wiki_category_detail_view import wiki_category_detail
+from .wiki_category.wiki_category_delete_view import delete_wiki_category
+
+from .wiki_entry.wiki_entry_create_view import create_wiki_entry
+from .wiki_entry.wiki_entry_edit_view import edit_wiki_entry
+from .wiki_entry.wiki_entry_delete_view import delete_wiki_entry
+
+from .wiki_user.wiki_overview import wiki_overview
+from .wiki_user.wiki_entry_content import wiki_entry_content
+from .wiki_user.wiki_entry_detail import wiki_entry_detail

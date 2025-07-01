@@ -1,0 +1,2 @@
+from .wiki_category_form import WikiCategoryForm
+from .wiki_entry_form import WikiEntryForm

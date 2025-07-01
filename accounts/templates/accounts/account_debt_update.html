@@ -1,0 +1,46 @@
+{% extends 'index.html' %}
+
+{% block title %}Editar Deuda de {{ person.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="text-center font-weight-light">Editar Deuda de {{ person.name }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Mostrar los errores del formulario -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Campo amount -->
+                <div class="mb-3">
+                    <label for="id_amount" class="form-label">Monto</label>
+                    <input type="number" name="amount" value="{{ form.amount.value }}" class="form-control" step="0.01" required>
+                </div>
+
+                <!-- Campo due_date -->
+                <div class="mb-3">
+                    <label for="id_due_date" class="form-label">Fecha de Vencimiento</label>
+                    <input type="date" name="due_date" value="{{ form.due_date.value }}" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Actualizar Deuda</button>
+            </form>
+            <a href="{% url 'account-detail' pk=debt.person.id %}" class="btn btn-secondary mt-3">Volver a los Detalles de la Persona</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'index.html' %}
+
+{% block title %}{% if entrypack %}Editar Entry Pack{% else %}Nuevo Entry Pack{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center font-weight-light">{% if entrypack %}Editar Entry Pack{% else %}Nuevo Entry Pack{% endif %}</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_description">Descripción</label>
+                    {{ form.description }}
+                </div>
+                <!-- Campo oculto para el supplier -->
+                <input type="hidden" name="supplier" value="{{ supplier.id }}">
+                <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+                    <!-- Redirigir a la vista de detalles del proveedor -->
+                    <a href="{% url 'supplier-detail' supplier.id %}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">{% if entrypack %}Actualizar{% else %}Crear{% endif %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-shopping-cart me-1"></i> Lista de Carritos
+            </div>
+            <!-- Formulario de búsqueda a la derecha con lupita -->
+            <div class="input-group w-50">
+                <form method="get" action="" class="d-flex w-100">
+                    <!-- Búsqueda por texto -->
+                    <input type="text" id="cartSearch" class="form-control" placeholder="Buscar por usuario o método de pago" name="search" value="{{ search_query }}">
+                    <!-- Búsqueda por fecha -->
+                    <input type="date" class="form-control ms-2" name="date" value="{{ date_query }}">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha de Creación</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Método de Pago</th>
+                        <th>Cliente</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cart in page_obj %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ cart.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>${{ cart.total_price|floatformat:2 }}</td>
+                        <td>
+                            {% if cart.is_completed %}
+                            <span class="badge bg-success">Finalizado</span>
+                            {% else %}
+                            <span class="badge bg-warning">En proceso</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cart.payment_method %}
+                                {{ cart.payment_method.name }}
+                            {% else %}
+                                No especificado
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cart.client %}
+                                <a href="{% url 'account-detail' cart.client.pk %}">{{ cart.client }}</a>
+                            {% else %}
+                                Sin asignar
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'cart-detail' cart.id %}" class="btn btn-primary btn-sm">Ver Detalle</a>
+                            {% if not cart.is_completed %}
+                            <form method="post" action="{% url 'cart-delete' cart.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Seguro que deseas eliminar este carrito?');">Eliminar</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Controles de Paginación -->
+            <div class="d-flex justify-content-center mt-3">
+                <nav>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link text-dark" href="?page=1&entries={{ entries_per_page }}&search={{ search_query }}&date={{ date_query }}">Primera</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link text-dark" href="?page={{ page_obj.previous_page_number }}&entries={{ entries_per_page }}&search={{ search_query }}&date={{ date_query }}">Anterior</a>
+                        </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link bg-dark text-white">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link text-dark" href="?page={{ num }}&entries={{ entries_per_page }}&search={{ search_query }}&date={{ date_query }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link text-dark" href="?page={{ page_obj.next_page_number }}&entries={{ entries_per_page }}&search={{ search_query }}&date={{ date_query }}">Siguiente</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link text-dark" href="?page={{ page_obj.paginator.num_pages }}&entries={{ entries_per_page }}&search={{ search_query }}&date={{ date_query }}">Última</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% else %}
+            <div class="alert alert-info">No tienes carritos disponibles.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

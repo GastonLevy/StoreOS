@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki - Sistema de Inventario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        .sidebar {
+            background-color: #00796b;
+            color: white;
+            height: 100vh;
+            padding-top: 10px;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+
+        .sidebar-heading {
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding-left: 15px;
+            margin-bottom: 20px;
+            color: #e0f2f1;
+        }
+
+        .category-button {
+            background-color: #004d40;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            margin: 8px 0;
+            width: 100%;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .category-button:hover {
+            background-color: #003b33;
+        }
+
+        .entry-link {
+            background-color: #00796b;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 1rem;
+            display: block;
+        }
+
+        .entry-link:hover {
+            background-color: #004d40;
+        }
+
+        .active-category {
+            background-color: #003b33 !important;
+        }
+
+        .active-entry {
+            background-color: #004d40 !important;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .entry-title {
+            font-size: 1.8rem;
+            color: #00796b;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .entry-content {
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background-color: #004d40;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <nav class="sidebar">
+            <div class="position-sticky">
+                <h6 class="sidebar-heading">Categorías</h6>
+                <ul class="nav flex-column">
+                    {% for category in categories %}
+                    <li class="nav-item">
+                        <button class="category-button" id="category-{{ category.id }}" style="width: 100%;">
+                            <i class="fas fa-folder"></i> {{ category.name }}
+                        </button>
+                        <div class="collapse" id="entries-{{ category.id }}">
+                            <ul class="list-unstyled ps-3">
+                                {% for entry in category.entries.all %}
+                                <li>
+                                    <a href="#" class="entry-link" data-entry-id="{{ entry.id }}" data-entry-title="{{ entry.title }}">
+                                        <span class="entry-icon"></span> {{ entry.title }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </nav>
+
+        <main class="content">
+            <h2 class="entry-title" id="welcome-title">Bienvenido a la Wiki</h2>
+            <p class="entry-content" id="welcome-content">Selecciona una categoría y una entrada para comenzar a explorar.</p>
+
+            <div id="entry-detail" class="d-none">
+                <h3 id="entry-title" class="entry-title"></h3>
+                <div id="entry-content" class="entry-content"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryButtons = document.querySelectorAll('.category-button');
+            const entryLinks = document.querySelectorAll('.entry-link');
+            const entryDetail = document.getElementById('entry-detail');
+            const entryTitle = document.getElementById('entry-title');
+            const entryContent = document.getElementById('entry-content');
+            const welcomeTitle = document.getElementById('welcome-title');
+            const welcomeContent = document.getElementById('welcome-content');
+
+            // Asignar los iconos según la primera palabra del título de la entrada
+            entryLinks.forEach(link => {
+                const entryTitleText = link.getAttribute('data-entry-title');
+                const iconSpan = link.querySelector('.entry-icon');
+
+                // Obtener la primera palabra del título de la entrada
+                const firstWord = entryTitleText.split(' ')[0];
+
+                // Asignar icono según la primera palabra
+                if (firstWord === "Agregando") {
+                    iconSpan.innerHTML = '<i class="fas fa-plus"></i>';
+                } else if (firstWord === "Editando") {
+                    iconSpan.innerHTML = '<i class="fas fa-edit"></i>';
+                } else if (firstWord === "Eliminando") {
+                    iconSpan.innerHTML = '<i class="fas fa-trash"></i>';
+                } else if (firstWord === "¿Qué") {
+                    iconSpan.innerHTML = '<i class="fas fa-question-circle"></i>';
+                } else {
+                    iconSpan.innerHTML = '<i class="fas fa-file-alt"></i>';
+                }
+            });
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const categoryId = this.id.split('-')[1];
+                    const entriesDiv = document.getElementById(`entries-${categoryId}`);
+                    const isCollapsed = entriesDiv.style.display === 'none' || entriesDiv.style.display === '';
+
+                    // Alternar la visibilidad de las entradas
+                    entriesDiv.style.display = isCollapsed ? 'block' : 'none';
+
+                    // Resaltar la categoría activa
+                    categoryButtons.forEach(btn => btn.classList.remove('active-category'));
+                    this.classList.add('active-category');
+                });
+            });
+
+            entryLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const entryId = this.getAttribute('data-entry-id');
+
+                    // Ocultar el mensaje de bienvenida
+                    welcomeTitle.classList.add('d-none');
+                    welcomeContent.classList.add('d-none');
+
+                    // Realizar una solicitud para obtener los detalles de la entrada
+                    fetch(`/wiki/entry/${entryId}/`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Entrada no encontrada');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            entryTitle.textContent = data.title;
+                            entryContent.innerHTML = data.content;
+                            entryDetail.classList.remove('d-none'); // Mostrar el detalle de la entrada
+
+                            // Resaltar la entrada activa
+                            entryLinks.forEach(link => link.classList.remove('active-entry'));
+                            this.classList.add('active-entry');
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar la entrada:', error);
+                            entryContent.innerHTML = "<p>No se pudo cargar la entrada.</p>";
+                        });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

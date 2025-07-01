@@ -1,0 +1,176 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-light">
+                <div class="card-body">
+                    <h3 class="text-center font-weight-light my-4">
+                        {% if item %}Editar producto{% else %}Crear producto{% endif %}
+                    </h3>
+
+                    <!-- Mensajes de error generales -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>¡Algo salió mal!</strong> Hay errores en el formulario:
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" id="itemForm">
+                        {% csrf_token %}
+
+                        <!-- Campo Nombre -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}"
+                                id="name" name="name" value="{{ item.name|default_if_none:'' }}" required>
+                            <label for="name">Nombre</label>
+                            {% for error in form.name.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Código de Barras -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control {% if form.barcode.errors %}is-invalid{% endif %}"
+                                id="barcode" name="barcode" value="{{ item.barcode|default_if_none:'' }}">
+                            <label for="barcode">Código de barras</label>
+                            {% for error in form.barcode.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Fila para Stockable y Cantidad -->
+                        <div class="row mb-3">
+                            <!-- Campo Cantidad -->
+                            <div class="col-md-10">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control {% if form.quantity.errors %}is-invalid{% endif %}"
+                                        id="quantity" name="quantity" value="{{ item.quantity|default_if_none:'' }}" required>
+                                    <label for="quantity">Cantidad</label>
+                                    {% for error in form.quantity.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Campo Stockable -->
+                            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                        class="form-check-input {% if form.stockable.errors %}is-invalid{% endif %}"
+                                        id="stockable" name="stockable" {% if item and item.stockable %}checked{% endif %}>
+                                    <label class="form-check-label" for="stockable">No contabilizar.</label>
+                                    {% for error in form.stockable.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campo Descripción -->
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                                id="description" name="description" style="height: 100px;">{{ item.description|default_if_none:'' }}</textarea>
+                            <label for="description">Descripción</label>
+                            {% for error in form.description.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Precio -->
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control {% if form.price.errors %}is-invalid{% endif %}"
+                                id="price" name="price" value="{{ item.price|default_if_none:0 }}" min="0" step="1.00" required>
+                            <label for="price">Precio</label>
+                            {% for error in form.price.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Costo -->
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control {% if form.cost.errors %}is-invalid{% endif %}"
+                                id="cost" name="cost" value="{{ item.cost|default_if_none:0 }}" min="0" step="0.01" required>
+                            <label for="cost">Costo</label>
+                            {% for error in form.cost.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo oculto para enviar 0 si está deshabilitado -->
+                        <input type="hidden" id="quantity_hidden" name="quantity" value="0">
+
+                        <!-- Campo Categorías con Choices.js -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="categories" class="form-label">Categorías</label>
+                                <select class="form-select choices {% if form.categories.errors %}is-invalid{% endif %}"
+                                    id="categories" name="categories" multiple>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if item and category in item.categories.all %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% for error in form.categories.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <a href="{% url 'item-list' %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">{% if item %}Actualizar{% else %}Crear{% endif %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Importación de Choices.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const choices = new Choices('.choices', {
+            removeItemButton: true,
+            placeholder: true,
+            placeholderValue: 'Selecciona una o más categorías' // Placeholder para el selector
+        });
+
+        // Referencias a los elementos
+        const stockableCheckbox = document.getElementById('stockable');
+        const quantityField = document.getElementById('quantity');
+        const quantityHiddenField = document.getElementById('quantity_hidden');  // Campo oculto
+
+        // Función para manejar la habilitación/deshabilitación de la cantidad
+        function toggleQuantityField() {
+            if (stockableCheckbox.checked) {
+                quantityHiddenField.value = 0;  // Asigna 0 al campo oculto cuando se selecciona el checkbox
+                quantityField.disabled = true;  // Deshabilita el campo cantidad
+                quantityField.name = "";       // Remueve el atributo name para que no se envíe
+                quantityHiddenField.name = "quantity";  // Asigna el name al campo oculto
+            } else {
+                quantityField.disabled = false;  // Habilita el campo cantidad
+                quantityField.name = "quantity"; // Asigna el name al campo visible
+                quantityHiddenField.name = "";   // Remueve el atributo name del campo oculto
+            }
+        }
+
+        // Inicializa el estado del campo cantidad en función del estado actual de stockable
+        toggleQuantityField();
+
+        // Evento cuando se cambia el checkbox stockable
+        stockableCheckbox.addEventListener('change', toggleQuantityField);
+    });
+</script>
+{% endblock %}

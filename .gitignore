@@ -1,0 +1,13 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+/media/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

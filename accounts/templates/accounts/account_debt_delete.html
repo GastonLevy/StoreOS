@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+
+{% block title %}Eliminar Deuda{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="text-center font-weight-light">¿Estás seguro de eliminar esta deuda?</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Monto:</strong> {{ debt.amount }}</p>
+            <p><strong>Fecha de Vencimiento:</strong> {{ debt.due_date }}</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Eliminar Deuda</button>
+                <a href="{% url 'account-detail' pk=debt.person.id %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

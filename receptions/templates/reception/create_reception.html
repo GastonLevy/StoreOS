@@ -1,0 +1,177 @@
+{% extends 'index.html' %}
+
+{% block title %}{% if reception %}Editar Recepción{% else %}Nueva Recepción{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-light">
+                <div class="card-body">
+                    <h3 class="text-center font-weight-light my-4">
+                        {% if reception %}Editar Recepción{% else %}Nueva Recepción{% endif %}
+                    </h3>
+
+                    <!-- Mensajes de error generales -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>¡Algo salió mal!</strong> Hay errores en el formulario:
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" id="receptionForm">
+                        {% csrf_token %}
+
+                        <div class="card shadow-sm border-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Seleccionar Cliente</h5>
+                                <!-- Radio buttons para elegir entre Cliente o Crear Nuevo -->
+                                <div class="mb-3">
+                                    <input type="radio" id="choose_existing" name="person_choice" value="existing" {% if form.person_choice.value == 'existing' or form.person_choice.value == '' %}checked{% endif %}>
+                                    <label for="choose_existing">Cliente Existente</label>
+                                    <input type="radio" checked id="choose_new" name="person_choice" value="new" {% if form.person_choice.value == 'new' %}checked{% endif %}>
+                                    <label for="choose_new">Crear Nuevo</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Campo Persona (Cliente Existente) -->
+                        <div class="form-floating mb-3" id="existing_person_field" style="display: {% if form.person_choice.value == 'existing' or form.person_choice.value == '' %}block{% else %}none{% endif %};">
+                            {% if persons %}
+                                <select class="form-select {% if form.person.errors %}is-invalid{% endif %}" id="id_person" name="person">
+                                    {% for person in persons %}
+                                        <option value="{{ person.id }}" {% if form.person.value == person.id %}selected{% endif %}>{{ person }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <div class="alert alert-warning" role="alert">
+                                    No hay clientes registrados. Puedes crear uno nuevo.
+                                </div>
+                            {% endif %}
+                            {% for error in form.person.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campos para Nueva Persona (si no se selecciona una persona existente) -->
+                        <div id="new_person_fields" style="display: {% if form.person_choice.value == 'new' %}block{% else %}none{% endif %};">
+                            <div class="mb-3">
+                                <label for="new_person_first_name">Primer Nombre</label>
+                                <input type="text" class="form-control {% if form.new_person_first_name.errors %}is-invalid{% endif %}" id="new_person_first_name" name="new_person_first_name" value="{{ form.new_person_first_name.value|default_if_none:'' }}">
+                                {% for error in form.new_person_first_name.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="new_person_last_name">Apellido</label>
+                                <input type="text" class="form-control {% if form.new_person_last_name.errors %}is-invalid{% endif %}" id="new_person_last_name" name="new_person_last_name" value="{{ form.new_person_last_name.value|default_if_none:'' }}">
+                                {% for error in form.new_person_last_name.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="new_person_address">Dirección</label>
+                                <input type="text" class="form-control {% if form.new_person_address.errors %}is-invalid{% endif %}" id="new_person_address" name="new_person_address" value="{{ form.new_person_address.value|default_if_none:'' }}">
+                                {% for error in form.new_person_address.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="new_person_phone">Teléfono</label>
+                                <input type="text" class="form-control {% if form.new_person_phone.errors %}is-invalid{% endif %}" id="new_person_phone" name="new_person_phone" value="{{ form.new_person_phone.value|default_if_none:'' }}">
+                                {% for error in form.new_person_phone.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Campo Artículo -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control {% if form.item.errors %}is-invalid{% endif %}" id="item" name="item" value="{{ reception.item|default_if_none:'' }}" required>
+                            <label for="item">Artículo</label>
+                            {% for error in form.item.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Detalles del Artículo -->
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control {% if form.item_details.errors %}is-invalid{% endif %}" id="item_details" name="item_details" style="height: 100px;">{{ reception.item_details|default_if_none:'' }}</textarea>
+                            <label for="item_details">Detalles del Artículo</label>
+                            {% for error in form.item_details.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Notas -->
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control {% if form.notes.errors %}is-invalid{% endif %}" id="notes" name="notes" style="height: 100px;">{{ reception.notes|default_if_none:'' }}</textarea>
+                            <label for="notes">Observaciones</label>
+                            {% for error in form.notes.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Campo Estado -->
+                        <div class="mb-3">
+                            <label for="status">Estado</label>
+                            <select class="form-select {% if form.status.errors %}is-invalid{% endif %}" id="status" name="status">
+                                <option value="pending" {% if reception.status == 'pending' %}selected{% endif %}>Pendiente</option>
+                            </select>
+                            {% for error in form.status.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <a href="{% url 'reception-list' %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">{% if reception %}Actualizar{% else %}Crear{% endif %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chooseExisting = document.getElementById('choose_existing');
+        const chooseNew = document.getElementById('choose_new');
+        const existingPersonField = document.getElementById('existing_person_field');
+        const newPersonFields = document.getElementById('new_person_fields');
+
+        // Muestra la sección de "Cliente Existente" por defecto
+        if (chooseExisting.checked) {
+            existingPersonField.style.display = 'block';
+            newPersonFields.style.display = 'none';
+        } else {
+            existingPersonField.style.display = 'none';
+            newPersonFields.style.display = 'block';
+        }
+
+        // Lógica para mostrar/ocultar los campos según la opción seleccionada
+        chooseExisting.addEventListener('change', function() {
+            existingPersonField.style.display = 'block';
+            newPersonFields.style.display = 'none';
+        });
+
+        chooseNew.addEventListener('change', function() {
+            existingPersonField.style.display = 'none';
+            newPersonFields.style.display = 'block';
+        });
+    });
+</script>
+
+{% endblock %}

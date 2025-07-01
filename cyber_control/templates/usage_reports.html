@@ -1,0 +1,257 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<style>
+    hr.my-4 {
+        border: 0;
+        border-top: 1px solid #ccc;
+        margin: 2rem 0;
+    }
+</style>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Cards para los Últimos 30 Días -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-clock me-1"></i> Horas Totales (Últimos 30 Días)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Tipo de Cliente</th>
+                                <th>Horas Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Clientes Registrados</td>
+                                <td>{{ registered_hours_30_days|default:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Clientes No Registrados</td>
+                                <td>{{ unregistered_hours_30_days|default:0 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users me-1"></i> Clientes Más Usados (Últimos 30 Días)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Horas Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients_page_obj %}
+                            <tr>
+                                <td>{{ client.client__first_name }} {{ client.client__last_name }}</td>
+                                <td>{{ client.total_hours|default:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No hay datos disponibles</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación para los Clientes Más Usados -->
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if clients_page_obj.has_previous %}
+                                <a href="?page_clients_30={{ clients_page_obj.previous_page_number }}">Anterior</a>
+                            {% endif %}
+                            <span class="current">
+                                Página {{ clients_page_obj.number }} de {{ clients_page_obj.paginator.num_pages }}.
+                            </span>
+                            {% if clients_page_obj.has_next %}
+                                <a href="?page_clients_30={{ clients_page_obj.next_page_number }}">Siguiente</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-gamepad me-1"></i> Dispositivos Más Usados (Últimos 30 Días)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Dispositivo</th>
+                                <th>Horas Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in devices_page_obj %}
+                            <tr>
+                                <td>{{ device.device__name }}</td>
+                                <td>{{ device.total_hours|default:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No hay datos disponibles</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación para los Dispositivos Más Usados -->
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if devices_page_obj.has_previous %}
+                                <a href="?page_devices_30={{ devices_page_obj.previous_page_number }}">Anterior</a>
+                            {% endif %}
+                            <span class="current">
+                                Página {{ devices_page_obj.number }} de {{ devices_page_obj.paginator.num_pages }}.
+                            </span>
+                            {% if devices_page_obj.has_next %}
+                                <a href="?page_devices_30={{ devices_page_obj.next_page_number }}">Siguiente</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Línea Divisora -->
+    <hr class="my-4">
+
+    <div class="row">
+        <!-- Cards para Siempre -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-clock me-1"></i> Horas Totales (Siempre)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Tipo de Cliente</th>
+                                <th>Horas Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Clientes Registrados</td>
+                                <td>{{ registered_hours|default:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Clientes No Registrados</td>
+                                <td>{{ unregistered_hours|default:0 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users me-1"></i> Clientes Más Usados (Siempre)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Horas Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients_page_obj_all %}
+                            <tr>
+                                <td>{{ client.client__first_name }} {{ client.client__last_name }}</td>
+                                <td>{{ client.total_hours|default:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No hay datos disponibles</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación para los Clientes Más Usados -->
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if clients_page_obj_all.has_previous %}
+                                <a href="?page_clients={{ clients_page_obj_all.previous_page_number }}">Anterior</a>
+                            {% endif %}
+                            <span class="current">
+                                Página {{ clients_page_obj_all.number }} de {{ clients_page_obj_all.paginator.num_pages }}.
+                            </span>
+                            {% if clients_page_obj_all.has_next %}
+                                <a href="?page_clients={{ clients_page_obj_all.next_page_number }}">Siguiente</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-gamepad me-1"></i> Dispositivos Más Usados (Siempre)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Dispositivo</th>
+                                <th>Horas Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in devices_page_obj_all %}
+                            <tr>
+                                <td>{{ device.device__name }}</td>
+                                <td>{{ device.total_hours|default:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">No hay datos disponibles</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación para los Dispositivos Más Usados -->
+                    <div class="pagination">
+                        <span class="step-links">
+                            {% if devices_page_obj_all.has_previous %}
+                                <a href="?page_devices={{ devices_page_obj_all.previous_page_number }}">Anterior</a>
+                            {% endif %}
+                            <span class="current">
+                                Página {{ devices_page_obj_all.number }} de {{ devices_page_obj_all.paginator.num_pages }}.
+                            </span>
+                            {% if devices_page_obj_all.has_next %}
+                                <a href="?page_devices={{ devices_page_obj_all.next_page_number }}">Siguiente</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'index.html' %}
+
+{% block title %}Detalles de la Categoría{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-light">
+                <div class="card-header bg-light text-dark">
+                    <i class="fas fa-info-circle me-1"></i> Información de la Categoría: <b>{{ category.name }}</b>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Nombre</th>
+                                <td>{{ category.name }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="d-flex justify-content-between mt-4">
+                        {% if "Admin" in user_groups %}
+                            <a href="{% url 'category-update' category.pk %}" class="btn btn-warning">Editar</a>
+                        {% endif %}
+                        {% if "Admin" in user_groups %}
+                            <a href="{% url 'category-delete' category.pk %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta categoría?')">Eliminar</a>
+                        {% endif %}
+                        <a href="{% url 'category-list' %}" class="btn btn-secondary">Volver a la lista</a>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- Lista de ítems en la categoría -->
+            <div class="card shadow-sm border-light">
+                <div class="card-body">
+                    <h3 class="text-center font-weight-light my-4">Ítems en esta categoría:</h3>
+                    {% if items %}
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Código de Barras</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.barcode }}</td>
+                                <td>${{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>
+                                    <a href="{% url 'item-detail' item.pk %}" class="btn btn-info btn-sm">Ver</a>
+                                    {% if "Admin" in user_groups %}
+                                        <a href="{% url 'item-update' item.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p>No hay ítems en esta categoría.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

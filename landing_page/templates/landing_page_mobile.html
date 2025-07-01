@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Yaca: Sistema de Inventario y Gestión de Ventas</title>
+    <meta name="description" content="Optimiza tu negocio con el sistema de inventario y gestión de ventas de Tienda Yaca. ¡Descubre más!">
+    <meta name="keywords" content="inventario, gestión, ventas, online, tienda, productos, clientes, software, negocio">
+    <link rel="icon" href="{% static 'imagefiles/LogoTiendaYaca_white.png' %}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .hero,
+        .features,
+        .benefits,
+        .store,
+        .call-to-action {
+            padding: 0 15px;
+        }
+
+        .hero {
+            background: linear-gradient(to right, #00796b, #004d40);
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .features,
+        .benefits,
+        .store,
+        .call-to-action {
+            background-color: #f9f9f9;
+        }
+
+        .call-to-action {
+            background: #00796b;
+            color: white;
+        }
+
+        footer {
+            background: #004d40;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .icon-box {
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .list-group-item strong {
+            color: #00796b;
+        }
+
+        .btn-lg {
+            padding: 10px 30px;
+            font-size: 1.2rem;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .next-button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .next-button:hover {
+            background-color: #004d40;
+        }
+
+        .icon-box i {
+            font-size: 3rem;
+            color: #00796b;
+        }
+
+        .icon-box h3 {
+            margin-top: 15px;
+        }
+
+        .list-group-item d-flex {
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Estilo personalizado para mejorar la distribución de las secciones */
+        .features .row,
+        .store .row {
+            justify-content: center;
+        }
+
+        /* Asegurarse de que las imágenes e iconos se alineen correctamente */
+        .icon-box p {
+            font-size: 0.9rem;
+        }
+
+        /* Estilo para la navbar fija */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar {
+            background-color: #f1f1f1; /* Fondo gris claro */
+            border-bottom: 3px solid #00796b; /* Línea verde en la parte inferior */
+        }
+
+        .navbar a {
+            color: #00796b; /* Color verde para los enlaces */
+        }
+
+        .navbar a:hover {
+            color: #004d40; /* Un tono más oscuro para el hover */
+        }
+
+        /* Estilo para el logo de TiendaYaca */
+        .navbar span {
+            color: #00796b; /* El color de "Tienda" */
+        }
+
+        .navbar span strong {
+            color: #28a745; /* El color de "Yaca" */
+        }
+
+        /* Ocultar los botones en pantallas pequeñas */
+        .next-button {
+            display: none;
+        }
+
+        /* Mostrar botones en pantallas grandes */
+        @media (min-width: 768px) {
+            .next-button {
+                display: inline-block;
+            }
+        }
+
+        /* Mejorar la responsividad en móviles */
+        @media (max-width: 767px) {
+            .hero h1 {
+                font-size: 1.5rem;
+                /* Reducir tamaño del título */
+            }
+
+            .hero p {
+                font-size: 1rem;
+                /* Reducir tamaño del subtítulo */
+            }
+
+            .features h2,
+            .benefits h2 {
+                font-size: 1.5rem;
+                /* Reducir tamaño de los encabezados */
+            }
+
+            .icon-box i {
+                font-size: 2rem;
+                /* Reducir el tamaño de los iconos */
+            }
+
+            .icon-box h3 {
+                font-size: 1rem;
+                /* Reducir tamaño de los títulos */
+            }
+
+            .icon-box p {
+                font-size: 0.8rem;
+                /* Reducir tamaño de los textos */
+            }
+
+            .navbar-toggler {
+                border-color: #fff;
+                /* Cambiar color del botón */
+            }
+
+            .navbar-collapse {
+                text-align: center;
+            }
+
+            footer p {
+                font-size: 0.9rem;
+                /* Reducir tamaño del texto en el pie de página */
+            }
+
+            /* Distribución más libre de iconos y texto en dispositivos móviles */
+            .features .row,
+            .benefits .row,
+            .store .row {
+                display: block;
+                text-align: center;
+            }
+
+            .icon-box {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            .icon-box p {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Eliminar márgenes y padding extras entre secciones */
+        .features,
+        .benefits,
+        .store,
+        .call-to-action {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Asegurarse de que no haya margen entre las secciones */
+        .features,
+        .benefits {
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .features h2,
+        .benefits h2 {
+            margin-top: 0;
+        }
+
+        .icon-box {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <div style="display: flex; align-items: center;">
+                <span style="font-size: 1.2rem; font-weight: normal; display: flex; align-items: baseline; letter-spacing: 0;">
+                    <span style="color: #212529; font-size: 1.1rem; margin-right: 0;">Tienda</span>
+                    <span style="color: #28a745; font-size: 1.5rem; font-weight: bold;">Yaca</span>
+                </span>
+                &nbsp;&nbsp;
+                <img src="{% static 'imagefiles/LogoTiendaYaca_white.png' %}" alt="Logo Tienda Yaca" class="img-fluid" style="max-height: 50px; height: auto;">
+            </div>
+            <div class="d-flex ms-auto">
+                <a class="nav-link" href="#contact" style="margin-left: 15px;">Contacto</a>
+                &nbsp;&nbsp;
+                <a class="nav-link" href="{% url 'login' %}" style="margin-left: 15px;">Iniciar Sesión</a>
+            </div>
+        </div>
+    </nav>    
+    <!-- Hero Section -->
+    <section class="hero" id="hero" style="position: relative;">
+        <div>
+            <h1>Controla tu Inventario y Ventas con Tienda Yaca</h1>
+            <p>Optimiza tu negocio con nuestra solución todo en uno</p>
+        </div>
+        <!-- Deslizá hacia abajo con flecha -->
+        <div style="position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); text-align: center;">
+            <p>Deslizá hacia abajo</p>
+            <i class="bi bi-arrow-down-circle" style="font-size: 2rem; color: white;"></i>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="text-center text-success pt-5 pb-5">Características Principales</h2>
+            <div class="row">
+                <div class="col-12 col-md-4">
+                    <div class="icon-box p-3 shadow-sm bg-white rounded">
+                        <i class="bi bi-archive-fill mb-3"></i>
+                        <h3 class="h5">Gestión de Productos</h3>
+                        <p>Organiza tus productos en diferentes categorías para facilitar su búsqueda y gestión.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 pt-3">
+                    <div class="icon-box p-3 shadow-sm bg-white rounded">
+                        <i class="bi bi-bar-chart-fill mb-3"></i>
+                        <h3 class="h5">Control de Ventas</h3>
+                        <p>Registra ventas, asigna métodos de pago y genera reportes automáticos.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 pt-3">
+                    <div class="icon-box p-3 shadow-sm bg-white rounded">
+                        <i class="bi bi-credit-card-fill mb-3"></i>
+                        <h3 class="h5">Cuentas Corrientes</h3>
+                        <p>Gestiona pagos y deudas de tus clientes fácilmente.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 pt-3">
+                    <div class="icon-box p-3 shadow-sm bg-white rounded">
+                        <i class="bi bi-calendar-check-fill mb-3"></i>
+                        <h3 class="h5">Registro de Compras</h3>
+                        <p>Realiza un seguimiento detallado de las compras de tus clientes y proveedores.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 pt-3">
+                    <div class="icon-box p-3 shadow-sm bg-white rounded">
+                        <i class="bi bi-person-lines-fill mb-3"></i>
+                        <h3 class="h5">Gestión de Clientes</h3>
+                        <p>Administra la información de tus clientes y su historial de compras.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="next-button" onclick="window.location.href='#benefits'">Siguiente: Beneficios</button>
+        </div>
+    </section>
+
+    <!-- Beneficios Section -->
+    <section id="benefits" class="benefits">
+        <div class="container">
+            <h2 class="text-center text-success pt-5 pb-5">Beneficios del Sistema</h2>
+            <ul class="list-group p-0">
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-box-arrow-in-down text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Optimización de inventarios:</strong> Controla los niveles de stock en tiempo real.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-bar-chart-fill text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Informes detallados:</strong> Accede a informes de ventas, compras y stock.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-credit-card-fill text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Control de cuentas corrientes:</strong> Gestión fácil de pagos y deudas con clientes y
+                        proveedores.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-truck text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Proveedores y logística:</strong> Registra los proveedores y gestiona los envíos de
+                        mercancía.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-cash-coin text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Control de caja:</strong> Realiza la apertura de caja y lleva el control de ingresos y
+                        egresos.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-graph-up text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Reportes en tiempo real:</strong> Obtén reportes inmediatos para la toma de decisiones.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-headset text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Soporte al cliente:</strong> Accede a atención y soporte para resolver cualquier
+                        inconveniente.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex align-items-center justify-content-center mb-3">
+                    <i class="bi bi-phone text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Accesibilidad desde cualquier lugar:</strong> Accede al sistema desde cualquier
+                        dispositivo con conexión a Internet.
+                    </div>
+                </li>
+            </ul>
+            <button class="next-button" onclick="window.location.href='#store'">Siguiente: Tienda</button>
+        </div>
+    </section>
+
+    <section id="store" class="store pb-5">
+        <div class="container">
+            <h2 class="text-center text-success pt-5 pb-5">Próxima Funcionalidad: Tienda Online</h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                <div class="col">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-card-list fs-1 mb-3"></i>
+                            <h5 class="card-title">Crear publicaciones</h5>
+                            <p class="card-text">Subir productos y especificar sus características y precios.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-boxes fs-1 mb-3"></i>
+                            <h5 class="card-title">Mostrar inventario</h5>
+                            <p class="card-text">Mostrar los productos disponibles en tiempo real.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-file-earmark-check fs-1 mb-3"></i>
+                            <h5 class="card-title">Tomar pedidos</h5>
+                            <p class="card-text">Gestionar y recibir pedidos de clientes de forma automática.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-chat-dots fs-1 mb-3"></i>
+                            <h5 class="card-title">Generar contacto</h5>
+                            <p class="card-text">Establecer comunicación directa con los clientes a través de la plataforma.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="store-description bg-white p-4 shadow-sm rounded text-center mt-4">
+                <p>Esta herramienta facilitará la expansión del negocio hacia el comercio electrónico, permitiendo alcanzar a más clientes y aumentar las ventas de manera significativa. Además, se implementará una opción para crear publicaciones, mostrar inventario con precios ajustables, tomar pedidos y generar contacto con los clientes, todo desde una única plataforma web.</p>
+            </div>
+            <button class="next-button mt-4 btn btn-success btn-lg w-100" onclick="window.location.href='#call-to-action'">Siguiente: Únete Ahora</button>
+        </div>
+    </section>
+
+    <!-- Store Section -->
+<section id="call-to-action" class="call-to-action" style="display: flex; justify-content: center; align-items: center; text-align: center; background-color: #f8f9fa; padding: 50px 20px;">
+    <div class="col-12 col-md-8 col-lg-6 d-flex justify-content-center">
+        <div class="card shadow-sm flex-fill" style="border-radius: 8px; background-color: #ffffff; border: 1px solid #f0f0f0;">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title" style="font-size: 1.6rem; font-weight: bold; color: #00796B; margin-bottom: 20px;">Datos de Contado</h5>
+                <p class="card-text text-primary" style="font-size: 2rem; margin-bottom: 20px;">Información</p>
+                <p class="text-muted" style="font-size: 1rem; margin-bottom: 30px;">Detalles de pagos y facturación</p>
+                
+                <ul class="list-group list-group-flush text-start flex-grow-1 d-flex flex-column mb-4">
+                    <li class="list-group-item d-flex align-items-center" style="padding: 12px; margin-bottom: 15px;">
+                        <i class="fa fa-credit-card text-muted" aria-hidden="true" style="font-size: 1.3rem; margin-right: 10px;"></i>
+                        <strong>Métodos de pago</strong>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="padding: 12px; margin-bottom: 15px;">
+                        <i class="fa fa-file-invoice text-muted" aria-hidden="true" style="font-size: 1.3rem; margin-right: 10px;"></i>
+                        <strong>Condiciones de facturación</strong>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="padding: 12px; margin-bottom: 15px;">
+                        <i class="fa fa-percent text-muted" aria-hidden="true" style="font-size: 1.3rem; margin-right: 10px;"></i>
+                        <strong>Descuentos especiales</strong>
+                    </li>
+                </ul>
+
+                <div>
+                    <h6 class="mb-3" style="font-size: 1.4rem; font-weight: bold; color: #00796B; margin-bottom: 15px;">Contáctanos:</h6>
+                    <ul class="list-group list-group-flush text-start">
+                        <li class="list-group-item d-flex align-items-center" style="padding: 12px; margin-bottom: 15px;">
+                            <button onclick="window.location.href='https://wa.me/5493777637180'" class="btn" style="font-weight: bold; width: 100%; background-color: #00796B; color: white; text-align: left; padding: 15px;">
+                                <i class="fab fa-whatsapp text-white" aria-hidden="true" style="font-size: 1.3rem; margin-right: 10px;"></i>
+                                <strong style="color: white;">Teléfono:</strong> +54 9 3777 637180
+                            </button>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center" style="padding: 12px; margin-bottom: 15px;">
+                            <button onclick="window.open('https://www.instagram.com/tiendayaca/?igsh=cWt2ajJrOGhybHc3#', '_blank')" class="btn" style="font-weight: bold; width: 100%; background-color: #00796B; color: white; text-align: left; padding: 15px;">
+                                <i class="fab fa-instagram text-white" aria-hidden="true" style="font-size: 1.3rem; margin-right: 10px;"></i>
+                                <strong style="color: white;">Instagram:</strong> Tienda Yaca
+                            </button>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center" style="padding: 12px; margin-bottom: 15px;">
+                            <button onclick="window.location.href='mailto:ventas@tiendayaca.com'" class="btn" style="font-weight: bold; width: 100%; background-color: #00796B; color: white; text-align: left; padding: 15px;">
+                                <i class="fa fa-envelope text-white" aria-hidden="true" style="font-size: 1.3rem; margin-right: 10px;"></i>
+                                <strong style="color: white;">Email:</strong> ventas@tiendayaca.com
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>
