@@ -93,23 +93,20 @@ El proyecto estará disponible en http://127.0.0.1:8000/.
 
 Estructura del Proyecto
 TiendaYaca/
-├── accounts/          # Gestión de cuentas, formularios, modelos y vistas relacionadas.
-├── cash_register/     # Funcionalidades relacionadas con la caja registradora.
-├── checkout/          # Procesamiento de pagos y gestión del carrito de compras.
-├── cyber_control/     # Módulo de control de dispositivos o monitoreo.
-├── excel_import/      # Funcionalidades para importar datos desde Excel.
-├── inventory/         # Gestión del inventario (categorías, ítems, etc.).
-├── landing_page/      # Vistas y plantillas para la página de inicio.
-├── receptions/        # Gestión de recepciones de mercancías o servicios.
-├── restaurant/        # Módulo de gestión para restaurantes (menús, platos, mesas).
-├── self_logs/         # Registro y monitoreo de acciones internas.
-├── self_wiki/         # Documentación interna o wiki del sistema.
-├── storeos/           # Configuración principal de Django (settings, urls, wsgi, etc.).
-├── templates/         # Plantillas generales del proyecto.
-└── users/             # Gestión de usuarios, perfiles y autenticación.
+├── accounts/       # Gestión de cuentas, formularios, modelos y vistas relacionadas.
+├── cash_register/  # Funcionalidades relacionadas con la caja registradora.
+├── checkout/       # Procesamiento de pagos y gestión del carrito de compras.
+├── cyber_control/  # Módulo de control de dispositivos o monitoreo.
+├── excel_import/   # Funcionalidades para importar datos desde Excel.
+├── inventory/      # Gestión del inventario (categorías, ítems, etc.).
+├── landing_page/   # Vistas y plantillas para la página de inicio.
+├── receptions/     # Gestión de recepciones de mercancías o servicios.
+├── self_logs/      # Registro y monitoreo de acciones internas.
+├── self_wiki/      # Documentación interna o wiki del sistema.
+├── storeos/        # Configuración principal de Django (settings, urls, wsgi, etc.).
+├── templates/      # Plantillas generales del proyecto.
+└── users/          # Gestión de usuarios, perfiles y autenticación.
 Cada uno de estos directorios contiene subcarpetas y archivos específicos que implementan la funcionalidad correspondiente.
-
-Nota: Para ver la estructura completa del proyecto, se recomienda generar un árbol con herramientas que limiten la profundidad o incluir el listado completo en un archivo adjunto.
 
 Licencia
 El código de TiendaYaca fue desarrollado a medida y entregado a una empresa que lo utiliza internamente. No cuenta con una licencia de código abierto ni está disponible para distribución pública.
