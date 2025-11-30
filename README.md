@@ -47,7 +47,7 @@ You can view all dependencies in the `requirements.txt` file.
 If you use Git:
 
 ```bash
-git clone [URL not provided since it's private.]
+git clone https://github.com/GastonLevy/StoreOS
 cd tiendayaca
 ```
 
