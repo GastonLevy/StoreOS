@@ -1,7 +1,7 @@
 <h1>🚀 StoreOS</h1>
 <h3>Multi-Tenant Inventory, Sales & Restaurant Management Platform</h3>
 
-<p><strong>StoreOS</strong> is a full-featured <strong>SaaS platform</strong> designed for small and medium businesses that need a modern, scalable system to manage inventory, sales, suppliers, payments, and restaurant operations. 
+<p><strong>StoreOS</strong> is a full-featured <strong>SaaS platform</strong> designed for small and medium businesses that need a modern, scalable system to manage inventory, sales, suppliers, payments. 
 It supports <strong>multiple companies (multi-tenant architecture)</strong>, allowing each business to operate independently within the same system.</p>
 
 <p>This project demonstrates professional-level Django development, including modular architecture, REST APIs, role-based access control, and production-ready configuration.</p>
