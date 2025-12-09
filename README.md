@@ -42,16 +42,6 @@ It supports <strong>multiple companies (multi-tenant architecture)</strong>, all
 <hr>
 
 <h2>🖼️ Screenshots</h2>
-<p></p>
-
-<pre>
-/screenshots
-├── dashboard.png
-├── inventory_list.png
-├── sale_process.png
-├── restaurant_kitchen_view.png
-└── company_switcher.png
-</pre>
 
 <hr>
 
