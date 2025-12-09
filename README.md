@@ -50,7 +50,7 @@ It supports <strong>multiple companies (multi-tenant architecture)</strong>, all
 <hr>
 
 <h2>🖼️ Screenshots</h2>
-<p>(Add your images later – GitHub will render them nicely)</p>
+<p></p>
 
 <pre>
 /screenshots
