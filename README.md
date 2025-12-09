@@ -28,13 +28,6 @@ It supports <strong>multiple companies (multi-tenant architecture)</strong>, all
   <li>Daily summaries and cash register tracking.</li>
 </ul>
 
-<h3>👨‍🍳 Restaurant Module</h3>
-<ul>
-  <li>Menu and dish management.</li>
-  <li>Table management, live kitchen view, order tracking.</li>
-  <li>Optimized workflow for busy environments.</li>
-</ul>
-
 <h3>📄 Account & Finance Tools</h3>
 <ul>
   <li>Current accounts, supplier management, pending payments.</li>
@@ -44,7 +37,6 @@ It supports <strong>multiple companies (multi-tenant architecture)</strong>, all
 <h3>🧰 Internal Utilities</h3>
 <ul>
   <li>PDF generation, device detection, custom admin extensions, internal wiki for customers.</li>
-  <li>Cyber Control: device usage tracking module.</li>
 </ul>
 
 <hr>
