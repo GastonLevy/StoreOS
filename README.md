@@ -1,134 +1,173 @@
-# TiendaYaca
+<h1>🚀 StoreOS</h1>
+<h3>Multi-Tenant Inventory, Sales & Restaurant Management Platform</h3>
 
-**TiendaYaca** is an inventory and sales management system designed for small and medium-sized businesses. In addition to managing products and transactions, it offers:
+<p><strong>StoreOS</strong> is a full-featured <strong>SaaS platform</strong> designed for small and medium businesses that need a modern, scalable system to manage inventory, sales, suppliers, payments, and restaurant operations. 
+It supports <strong>multiple companies (multi-tenant architecture)</strong>, allowing each business to operate independently within the same system.</p>
 
-* Management of current accounts, suppliers, and payments.  
-* A specialized module for restaurants with menu, dish, table, and kitchen management.
+<p>This project demonstrates professional-level Django development, including modular architecture, REST APIs, role-based access control, and production-ready configuration.</p>
 
----
+<hr>
 
-## Requirements
+<h2>🧠 Key Features</h2>
 
-Before installing TiendaYaca, make sure you have the following requirements:
+<h3>🔐 Multi-Tenant Architecture</h3>
+<ul>
+  <li>Each company has isolated data (products, users, sales, suppliers, etc.).</li>
+  <li>Centralized administration while maintaining strict data separation.</li>
+</ul>
 
-### Required Software
+<h3>📦 Inventory Management</h3>
+<ul>
+  <li>Categories, items, bulk imports (Excel), low-stock alerts.</li>
+  <li>Stock movements, item logs, purchase receptions.</li>
+</ul>
 
-* Python **3.8 or higher** → [Download here](https://www.python.org/downloads/)
-* MySQL (or another database manager of your choice)
-* Git (optional, if you plan to clone the repository) → [Download here](https://git-scm.com/)
+<h3>💰 Sales & Checkout Module</h3>
+<ul>
+  <li>Cart system, checkout flow, payment handling.</li>
+  <li>Daily summaries and cash register tracking.</li>
+</ul>
 
-### Python Packages Used
+<h3>👨‍🍳 Restaurant Module</h3>
+<ul>
+  <li>Menu and dish management.</li>
+  <li>Table management, live kitchen view, order tracking.</li>
+  <li>Optimized workflow for busy environments.</li>
+</ul>
 
-TiendaYaca uses the following main packages:
+<h3>📄 Account & Finance Tools</h3>
+<ul>
+  <li>Current accounts, supplier management, pending payments.</li>
+  <li>Customer tracking and activity history.</li>
+</ul>
 
-* **Django** (main web framework)  
-* **mysqlclient** (MySQL connector)  
-* **Django REST Framework** (for API)  
-* **djangorestframework-simplejwt** (JWT token authentication)  
-* **django-cors-headers** (CORS handling)  
-* **django-ckeditor** (rich text editor)  
-* **django-widget-tweaks** (form customization)  
-* **gunicorn** (WSGI server for production)  
-* **pandas** (data management)  
-* **pillow** (image processing)  
-* **whitenoise** (static file management in production)  
-* **django-user-agents** (device and browser detection)  
-* **django-extensions** (extra Django tools)  
-* **xhtml2pdf** (PDF document generation in Django)
+<h3>🧰 Internal Utilities</h3>
+<ul>
+  <li>PDF generation, device detection, custom admin extensions, internal wiki for customers.</li>
+  <li>Cyber Control: device usage tracking module.</li>
+</ul>
 
-You can view all dependencies in the `requirements.txt` file.
+<hr>
 
----
+<h2>🖼️ Screenshots</h2>
+<p>(Add your images later – GitHub will render them nicely)</p>
 
-## Installation
+<pre>
+/screenshots
+├── dashboard.png
+├── inventory_list.png
+├── sale_process.png
+├── restaurant_kitchen_view.png
+└── company_switcher.png
+</pre>
 
-### 1. Clone the Repository
+<hr>
 
-If you use Git:
+<h2>🛠️ Tech Stack</h2>
 
-```bash
-git clone https://github.com/GastonLevy/StoreOS
-cd tiendayaca
-```
+<h3>Backend</h3>
+<ul>
+  <li><strong>Django</strong> (core framework)</li>
+  <li><strong>Django REST Framework</strong> (API)</li>
+  <li><strong>MySQL</strong></li>
+  <li><strong>JWT Authentication (SimpleJWT)</strong></li>
+</ul>
 
-If you don't use Git, you can download the code manually.
+<h3>Utilities & Libraries</h3>
+<ul>
+  <li>django-cors-headers</li>
+  <li>django-ckeditor</li>
+  <li>django-widget-tweaks</li>
+  <li>django-extensions</li>
+  <li>django-user-agents</li>
+  <li>xhtml2pdf</li>
+  <li>pandas, pillow</li>
+  <li>whitenoise</li>
+  <li>gunicorn</li>
+</ul>
 
-### 2. Create and Activate a Virtual Environment
+<hr>
 
-#### Windows (CMD)
+<h2>🏗️ Architecture Overview</h2>
 
-```bash
-python -m venv venv_clear
-venv_clear\Scripts\activate
-```
+<pre>
+StoreOS (SaaS)
+│
+├── Multi-Tenant Core
+│   ├── Company model
+│   ├── Company-aware middleware
+│   └── Tenant data isolation
+│
+├── Modules
+│   ├── Inventory
+│   ├── Sales / Checkout
+│   ├── Restaurant
+│   ├── Suppliers & Payments
+│   ├── Receptions
+│   ├── Users & Roles
+│   └── Internal Tools (PDF, logs, cyber control)
+│
+└── API Layer (DRF)
+    ├── Auth (JWT)
+    ├── CRUD endpoints per module
+    └── Pagination / filtering utilities
+</pre>
 
-#### Windows (PowerShell)
+<hr>
 
-```bash
-python -m venv venv_clear
-.\venv_clear\Scripts\Activate
-```
+<h2>📥 Installation</h2>
 
-#### Linux/macOS
+<h3>1. Clone the Repository</h3>
+<pre><code>git clone https://github.com/GastonLevy/StoreOS
+cd StoreOS
+</code></pre>
 
-```bash
-python3 -m venv venv_clear
-source venv_clear/bin/activate
-```
+<h3>2. Create a Virtual Environment</h3>
+<pre><code>python -m venv venv
+source venv/bin/activate      # Linux/macOS
+venv\Scripts\activate         # Windows
+</code></pre>
 
-### 3. Install Dependencies
+<h3>3. Install Dependencies</h3>
+<pre><code>pip install -r requirements.txt
+</code></pre>
 
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure Environment Variables
-
-Create a `.env` file at the project root with the following content:
-
-```env
-SECRET_KEY='your_secret_key'
+<h3>4. Configure Environment Variables</h3>
+<pre><code>
+SECRET_KEY="your_secret_key"
 DEBUG=True
-DATABASE_URL='mysql://user:password@localhost/tiendayaca'
-```
+DATABASE_URL="mysql://user:password@localhost/storeos"
+</code></pre>
 
-Adjust the `DATABASE_URL` variable according to the database manager you use.
-
-### 5. Apply Migrations and Run the Server
-
-```bash
+<h3>5. Apply Migrations & Run</h3>
+<pre><code>
 python manage.py migrate
 python manage.py runserver
-```
+</code></pre>
 
-The project will be available at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+<p>Access at: <strong>http://127.0.0.1:8000/</strong></p>
 
----
+<hr>
 
-## Project Structure
+<h2>📂 Project Structure</h2>
 
-```bash
-TiendaYaca/
-├── accounts/       # Account management, forms, models, and related views.
-├── cash_register/  # Cash register functionalities.
-├── checkout/       # Payment processing and shopping cart management.
-├── cyber_control/  # Device control or monitoring module.
-├── excel_import/   # Excel data import functionalities.
-├── inventory/      # Inventory management (categories, items, etc.).
-├── landing_page/   # Views and templates for the landing page.
-├── receptions/     # Goods or services reception management.
-├── self_logs/      # Internal logging and monitoring.
-├── self_wiki/      # Internal documentation or wiki system.
-├── storeos/        # Main Django configuration (settings, urls, wsgi, etc.).
-├── templates/      # General project templates.
-└── users/          # User management, profiles, and authentication.
-```
+<pre>
+StoreOS/
+├── accounts/          # Authentication, roles, profiles
+├── cash_register/     # Cash management & daily reports
+├── checkout/          # Sales workflow & payments
+├── cyber_control/     # Device usage tracking module
+├── excel_import/      # Bulk import tools
+├── inventory/         # Item, categories, stock logs
+├── landing_page/      # Public-facing landing page
+├── receptions/        # Goods reception workflow
+├── self_logs/         # Internal logs
+├── self_wiki/         # Customer documentation
+├── storeos/           # Core config (settings, urls)
+└── users/             # User accounts & permissions
+</pre>
 
-Each directory contains specific subfolders and files implementing its corresponding functionality.
+<hr>
 
----
-
-## License
-
-TiendaYaca is proprietary software delivered to a company for internal use.  
-It is not publicly available or distributed under an open-source license.
+<h2>🔒 License</h2>
+<p>StoreOS was built as proprietary software for business environments. It is not open-source and is shared for demonstration and portfolio purposes only.</p>
