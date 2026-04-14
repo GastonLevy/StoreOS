@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: storeos_web
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: change-me-in-production
+      DJANGO_DEBUG: "False"
+    volumes:
+      - ./media:/app/media
+      - ./db.sqlite3:/app/db.sqlite3
