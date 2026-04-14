@@ -3,11 +3,30 @@
 *.pot
 *.pyc
 __pycache__/
+
+# Local database
+db.sqlite3
+
+# User-uploaded files
 /media/
-*.pyc
 
-# macOS
+# Collected static files
+/staticfiles/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
 .DS_Store
-
-# Windows
 Thumbs.db
