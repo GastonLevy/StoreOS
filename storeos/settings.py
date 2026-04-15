@@ -23,13 +23,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tiendayaca.gastonlevy.com',
 ]
 
-# Si vas a usar proxy reverso con Nginx/Traefik y HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Login
 LOGIN_URL = 'login'
 
-# Internationalization
 LANGUAGE_CODE = 'es-mx'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -105,7 +102,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'storeos.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -113,7 +109,6 @@ DATABASES = {
     }
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -129,10 +124,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Static / Media
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
