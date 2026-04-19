@@ -1,0 +1,6 @@
+name: Deploy StoreOS to VPS
+
+on:
+  push:
+    branches:
+      - release/vps-ready
