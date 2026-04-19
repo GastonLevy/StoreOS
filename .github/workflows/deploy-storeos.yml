@@ -28,10 +28,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build image
-        run: docker build -t $IMAGE_NAME:release-vps-ready .
+        run: |
+          docker build -t $IMAGE_NAME:release-vps-ready .
+          docker tag $IMAGE_NAME:release-vps-ready $IMAGE_NAME:sha-${GITHUB_SHA::7}
 
       - name: Push image
-        run: docker push $IMAGE_NAME:release-vps-ready
+        run: |
+          docker push $IMAGE_NAME:release-vps-ready
+          docker push $IMAGE_NAME:sha-${GITHUB_SHA::7}
 
   deploy:
     runs-on: ubuntu-latest
