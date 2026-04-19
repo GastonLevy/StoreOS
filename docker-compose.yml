@@ -1,0 +1,27 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: storeos_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: storeos
+      MYSQL_USER: storeos
+      MYSQL_PASSWORD: storeos
+      MYSQL_ROOT_PASSWORD: root
+
+  web:
+    build: .
+    container_name: storeos_app
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DJANGO_SECRET_KEY: dev-secret-key
+      DJANGO_DEBUG: "True"
+      MYSQL_DATABASE: storeos
+      MYSQL_USER: storeos
+      MYSQL_PASSWORD: storeos
+      MYSQL_HOST: db
+      MYSQL_PORT: "3306"
+    ports:
+      - "8000:8000"
