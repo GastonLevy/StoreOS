@@ -5,9 +5,30 @@ on:
     branches:
       - release/vps-ready
 
+env:
+  IMAGE_NAME: ghcr.io/gastonlevy/storeos
+
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Test workflow
-        run: echo "Workflow detected correctly"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        run: docker build -t $IMAGE_NAME:release-vps-ready .
+
+      - name: Push image
+        run: docker push $IMAGE_NAME:release-vps-ready
