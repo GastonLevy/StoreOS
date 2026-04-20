@@ -76,8 +76,7 @@
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
-                    aria-expanded="false"><i class="fas fa-user fa-fw"></i>{{ user.first_name }} {{ user.last_name
-                    }}</a>
+                    aria-expanded="false"><i class="fas fa-user fa-fw"></i>{{ user.first_name }} {{ user.last_name }}</a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="{% url 'password_change' %}">Cambiar contraseña</a></li>
                     <li>
@@ -200,29 +199,25 @@
                             Secciones
                         </a>
                         {% endif %}
-                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups
-                        %}
+                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups %}
                         <a class="nav-link" href="{% url 'dish-list' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
                             Consumibles
                         </a>
                         {% endif %}
-                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups
-                        %}
+                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups %}
                         <a class="nav-link" href="{% url 'table-list' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chalkboard-teacher"></i></div>
                             Gestión Mesas
                         </a>
                         {% endif %}
-                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups
-                        %}
+                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups %}
                         <a class="nav-link" href="{% url 'table-grid' %}">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-users-line"></i></div>
                             Mesas
                         </a>
                         {% endif %}
-                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups
-                        %}
+                        {% if "Admin_Restaurante" in user_groups or "Mozo" in user_groups or "Cocinero" in user_groups %}
                         <a class="nav-link" href="{% url 'kitchen_view' %}">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-bread-slice"></i></div>
                             Cocina
@@ -269,7 +264,7 @@
                         <div class="sb-sidenav-menu-heading">Mi proveedor de Internet</div>
                         <a class="nav-link disabled">
                             <div class="sb-nav-link-icon"><i class="fas fa-headset"></i></div>
-                            Tengo un problema técnico
+                            Tengo un problema tecnico
                         </a>
                         <a class="nav-link disabled">
                             <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
