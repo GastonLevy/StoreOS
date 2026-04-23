@@ -103,42 +103,33 @@
                                 <th scope="row">Ingresos por Efectivo</th>
                                 <td class="text-success">${{ efectivo_ingresos }}</td>
                             </tr>
+
                             <tr>
                                 <th scope="row">Egresos por Efectivo</th>
                                 <td class="text-danger">-${{ vueltos }}</td>
                             </tr>
+
                             <tr>
-                                <th scope="row">Movimientos caja</th>
-                            <tr>
-                                <th scope="row">Movimientos (Ingresos | Egresos)</th>
+                                <th scope="row">Movimientos</th>
                                 <td>
-                                    <span class="text-success">
-                                        +${{ total_ingresos }}
-                                    </span>
+                                    <span class="text-success">+${{ total_ingresos }}</span>
                                     |
-                                    <span class="text-danger">
-                                        -${{ total_egresos }}
-                                    </span>
+                                    <span class="text-danger">-${{ total_egresos }}</span>
                                 </td>
                             </tr>
 
                             <tr>
                                 <th scope="row">Balance de movimientos</th>
-                                {% if movimientos < 0 %} <td class="text-danger">
-                                    -${{ movimientos|cut:"-" }}
-                                    </td>
+                                {% if movimientos < 0 %} <td class="text-danger">-${{ movimientos|cut:"-" }}</td>
                                     {% elif movimientos > 0 %}
-                                    <td class="text-success">
-                                        ${{ movimientos }}
-                                    </td>
+                                    <td class="text-success">${{ movimientos }}</td>
                                     {% else %}
-                                    <td>
-                                        ${{ movimientos }}
-                                    </td>
+                                    <td>${{ movimientos }}</td>
                                     {% endif %}
                             </tr>
+
                             <tr>
-                                <th scope="row">Saldo Final calculado</th>
+                                <th scope="row">Saldo Final</th>
                                 <td>${{ balance_total }}</td>
                             </tr>
                         </tbody>
