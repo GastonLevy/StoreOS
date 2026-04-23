@@ -108,21 +108,34 @@
                                 <td class="text-danger">-${{ vueltos }}</td>
                             </tr>
                             <tr>
-                            <th scope="row">Movimientos caja</th>
-                                {% if movimientos < 0 %}
-                                    <td class="text-danger">
-                                        -${{ movimientos|cut:"-" }}
+                                <th scope="row">Movimientos caja</th>
+                            <tr>
+                                <th scope="row">Movimientos (Ingresos | Egresos)</th>
+                                <td>
+                                    <span class="text-success">
+                                        +${{ total_ingresos }}
+                                    </span>
+                                    |
+                                    <span class="text-danger">
+                                        -${{ total_egresos }}
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th scope="row">Balance de movimientos</th>
+                                {% if movimientos < 0 %} <td class="text-danger">
+                                    -${{ movimientos|cut:"-" }}
                                     </td>
-                                {% elif movimientos > 0 %}
+                                    {% elif movimientos > 0 %}
                                     <td class="text-success">
                                         ${{ movimientos }}
                                     </td>
-                                {% else %}
+                                    {% else %}
                                     <td>
                                         ${{ movimientos }}
-                                    </td>   
-                                {% endif %}
-                            </td>
+                                    </td>
+                                    {% endif %}
                             </tr>
                             <tr>
                                 <th scope="row">Saldo Final calculado</th>
