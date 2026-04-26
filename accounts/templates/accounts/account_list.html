@@ -7,15 +7,18 @@
             <div>
                 <i class="fas fa-users me-1"></i> Lista de Personas
             </div>
+
             <!-- Formulario de búsqueda -->
             <div class="input-group w-50">
                 <form method="get" action="" class="d-flex w-100">
-                    <input type="text" id="personSearch" class="form-control" placeholder="Buscar por nombre, apellido o teléfono" name="search" value="{{ search_query }}">
+                    <input type="text" id="personSearch" class="form-control"
+                        placeholder="Buscar por nombre, apellido, DNI o teléfono"
+                        name="search" value="{{ search_query }}">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                 </form>
             </div>
+
             <div class="d-flex align-items-center ms-3">
-                <!-- Selector de número de entradas por página -->
                 <label for="entriesPerPage" class="me-2">Mostrar:</label>
                 <select id="entriesPerPage" class="form-select form-select-sm w-auto" onchange="changeEntriesPerPage()">
                     <option value="10" {% if entries_per_page == 10 %}selected{% endif %}>10</option>
@@ -24,14 +27,17 @@
                     <option value="100" {% if entries_per_page == 100 %}selected{% endif %}>100</option>
                 </select>
             </div>
+
             <a href="{% url 'account-create' %}" class="btn btn-primary btn-sm">Nueva Persona</a>
         </div>
+
         <div class="card-body">
             <table class="table table-striped table-bordered table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>Nombre</th>
                         <th>Apellido</th>
+                        <th>DNI</th>
                         <th>Teléfono</th>
                         <th>Acciones</th>
                     </tr>
@@ -41,6 +47,7 @@
                     <tr>
                         <td>{{ person.first_name }}</td>
                         <td>{{ person.last_name }}</td>
+                        <td>{{ person.dni }}</td>
                         <td>{{ person.phone }}</td>
                         <td>
                             {% if "Admin" in user_groups or "Cajero" in user_groups %}
@@ -54,13 +61,13 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">No hay personas registradas.</td>
+                        <td colspan="5" class="text-center">No hay personas registradas.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
-            <!-- Controles de paginación -->
+            <!-- Paginación -->
             <div class="d-flex justify-content-center mt-3">
                 <nav>
                     <ul class="pagination">
@@ -72,6 +79,7 @@
                             <a class="page-link" href="?page={{ page_obj.previous_page_number }}&entries={{ entries_per_page }}&search={{ search_query }}">Anterior</a>
                         </li>
                         {% endif %}
+
                         {% for num in page_obj.paginator.page_range %}
                         {% if page_obj.number == num %}
                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
@@ -81,6 +89,7 @@
                         </li>
                         {% endif %}
                         {% endfor %}
+
                         {% if page_obj.has_next %}
                         <li class="page-item">
                             <a class="page-link" href="?page={{ page_obj.next_page_number }}&entries={{ entries_per_page }}&search={{ search_query }}">Siguiente</a>
@@ -97,13 +106,13 @@
 </div>
 
 <script>
-    function changeEntriesPerPage() {
-        const entries = document.getElementById("entriesPerPage").value;
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('entries', entries);
-        currentUrl.searchParams.set('page', 1);
-        currentUrl.searchParams.set('search', document.getElementById('personSearch').value);
-        window.location.href = currentUrl.toString();
-    }
+function changeEntriesPerPage() {
+    const entries = document.getElementById("entriesPerPage").value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('entries', entries);
+    currentUrl.searchParams.set('page', 1);
+    currentUrl.searchParams.set('search', document.getElementById('personSearch').value);
+    window.location.href = currentUrl.toString();
+}
 </script>
 {% endblock %}
