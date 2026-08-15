@@ -8,13 +8,20 @@ services:
       MYSQL_USER: storeos
       MYSQL_PASSWORD: storeos
       MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
   web:
     build: .
     container_name: storeos_web
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DJANGO_SECRET_KEY: change-me-in-production
       DJANGO_DEBUG: "False"
