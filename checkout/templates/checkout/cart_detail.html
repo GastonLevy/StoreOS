@@ -69,11 +69,9 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Añadir al Carrito</button>
             </form>
-            
             <form method="post" autocomplete="off" action="{% url 'cart-detail' cart.id %}" id="deferred-form" style="display: none;">
                 {% csrf_token %}
                 <input type="hidden" name="deferred_price" value="true"> <!-- Agregar este campo -->
-                
                 <div class="d-flex align-items-center mb-4" style="position: relative;">
                     <input type="text" id="deferred-item-search" name="item" class="form-control"
                            placeholder="Buscar por nombre o código de barras" required>
@@ -257,61 +255,123 @@
 $(document).ready(function () {
     const inputField = $('#item-search');
     const resultsList = $('#autocomplete-results');
-    const itemIdField = $('#item-id');  // Campo oculto para el ID
-    const form = inputField.closest('form'); // Formulario contenedor
+    const itemIdField = $('#item-id');
+    const form = $('#search-form');
 
-    inputField.on('keyup', function (e) {
-        e.preventDefault();  // Evita que la página se desplace al escribir
+    let searchRequest = null;
+    let submitting = false;
 
-        const query = $(this).val();
+    function renderResults(data) {
+        resultsList.empty();
 
-        if (query.length > 2) {  // Buscar si hay al menos 3 caracteres
-            $.ajax({
-                url: '{% url "item-search" %}',  // Asegúrate de que la URL está bien configurada
-                data: { q: query },
-                dataType: 'json',
-                success: function (data) {
-                    resultsList.empty();  // Limpiar la lista de resultados
-                    if (data.length > 0) {
-                        data.forEach(item => {
-                            resultsList.append(`
-                                <li class="list-group-item list-group-item-action" data-id="${item.id}">
-                                    ${item.name} (${item.barcode}) - $${item.price.toFixed(2)}
-                                </li>
-                            `);
-                        });
-                        resultsList.show();  // Mostrar resultados sin desplazamiento
-                    } else {
-                        resultsList.append('<li class="list-group-item disabled">Sin resultados</li>');
-                        resultsList.show();  // Mostrar resultados sin desplazamiento
-                    }
-                }
+        if (data.length > 0) {
+            data.forEach(item => {
+                resultsList.append(`
+                    <li class="list-group-item list-group-item-action"
+                        data-id="${item.id}">
+                        ${item.name} (${item.barcode}) - $${item.price.toFixed(2)}
+                    </li>
+                `);
             });
+
+            resultsList.show();
         } else {
-            resultsList.hide();  // Ocultar resultados cuando el texto es insuficiente
+            resultsList.append(
+                '<li class="list-group-item disabled">Sin resultados</li>'
+            );
+            resultsList.show();
+        }
+    }
+
+    function searchProduct(query, callback = null) {
+        if (searchRequest) {
+            searchRequest.abort();
+        }
+
+        searchRequest = $.ajax({
+            url: '{% url "item-search" %}',
+            data: { q: query },
+            dataType: 'json',
+
+            success: function (data) {
+                renderResults(data);
+
+                if (callback) {
+                    callback(data);
+                }
+            },
+
+            error: function (xhr, status) {
+                if (status !== 'abort') {
+                    console.error('Error buscando producto');
+                }
+            }
+        });
+    }
+
+    inputField.on('input', function () {
+        const query = $(this).val().trim();
+
+        itemIdField.val('');
+
+        if (query.length > 2) {
+            searchProduct(query);
+        } else {
+            resultsList.hide();
         }
     });
 
-    resultsList.on('click', 'li', function () {
-        const selectedItem = $(this).text().trim(); // Elimina espacios
-        const selectedId = $(this).data('id');      // Obtiene el ID del ítem
+    resultsList.on('click', 'li[data-id]', function () {
+        const selectedText = $(this).text().trim();
+        const selectedId = $(this).data('id');
 
-        inputField.val(selectedItem);              // Coloca el texto en el campo de búsqueda
-        itemIdField.val(selectedId);               // Asigna el ID al campo oculto
-        resultsList.hide(); // Ocultar el listado cuando se selecciona un item
+        inputField.val(selectedText);
+        itemIdField.val(selectedId);
+
+        resultsList.hide();
+    });
+
+    form.on('submit', function (e) {
+        if (submitting) {
+            return;
+        }
+
+        if (itemIdField.val()) {
+            submitting = true;
+            return;
+        }
+
+        e.preventDefault();
+
+        const query = inputField.val().trim();
+
+        if (query.length < 3) {
+            return;
+        }
+
+        searchProduct(query, function (data) {
+            if (!data.length) {
+                return;
+            }
+
+            const firstItem = data[0];
+
+            itemIdField.val(firstItem.id);
+
+            inputField.val(
+                `${firstItem.name} (${firstItem.barcode}) - $${firstItem.price.toFixed(2)}`
+            );
+
+            submitting = true;
+            form[0].submit();
+        });
     });
 
     $(document).on('click', function (e) {
-        if (!$(e.target).closest('#item-search, #autocomplete-results').length) {
-            resultsList.hide();  // Ocultar el listado si se hace clic fuera
-        }
-    });
-
-    // Enviar el formulario al presionar Enter
-    inputField.on('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Evita el envío por defecto
-            form.submit();
+        if (!$(e.target).closest(
+            '#item-search, #autocomplete-results'
+        ).length) {
+            resultsList.hide();
         }
     });
 });
