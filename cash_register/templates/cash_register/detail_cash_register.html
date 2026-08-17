@@ -6,13 +6,16 @@
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="row">
-        <!-- Columna izquierda: Información, Resumen, Ingresos y Movimientos de Caja -->
+
+        <!-- Columna izquierda -->
         <div class="col-md-6">
+
             <!-- Información de la Caja -->
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-info-circle me-1"></i> Información de la Caja
                 </div>
+
                 <div class="card-body">
                     <table class="table table-striped table-bordered">
                         <tbody>
@@ -20,52 +23,74 @@
                                 <th scope="row">Usuario</th>
                                 <td>{{ cash_register.user.username }}</td>
                             </tr>
+
                             <tr>
                                 <th scope="row">Nombre</th>
                                 <td>{{ user.first_name }} {{ user.last_name }}</td>
                             </tr>
+
                             <tr>
                                 <th scope="row">Estado</th>
                                 <td>
                                     {% if cash_register.status == 'abierta' %}
-                                    <span class="badge bg-success">Abierta</span>
+                                        <span class="badge bg-success">Abierta</span>
                                     {% else %}
-                                    <span class="badge bg-danger">Cerrada</span>
+                                        <span class="badge bg-danger">Cerrada</span>
                                     {% endif %}
                                 </td>
                             </tr>
+
                             <tr>
                                 <th scope="row">Fecha de Apertura</th>
                                 <td>{{ cash_register.created_at }}</td>
                             </tr>
+
                             <tr>
                                 <th scope="row">Fecha de Cierre</th>
                                 <td>
                                     {% if cash_register.closed_at %}
-                                    {{ cash_register.closed_at }}
+                                        {{ cash_register.closed_at }}
                                     {% else %}
-                                    No cerrada
+                                        No cerrada
                                     {% endif %}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'cash-register-list' %}" class="btn btn-secondary">Volver al listado</a>
+                        <a href="{% url 'cash-register-list' %}" class="btn btn-secondary">
+                            Volver al listado
+                        </a>
+
                         {% if cash_register.status == 'abierta' %}
                         <form method="POST" action="{% url 'close-cash-register' cash_register.pk %}">
                             {% csrf_token %}
+
                             <div class="d-flex align-items-center">
                                 <div class="me-3">
-                                    <input type="number"
+                                    <input
+                                        type="number"
                                         class="form-control {% if form.closing_balance.errors %}is-invalid{% endif %}"
-                                        id="closing_balance" name="closing_balance" value="{{ closing_balance }}"
-                                        min="0" step="0.01" placeholder="Saldo final" required>
+                                        id="closing_balance"
+                                        name="closing_balance"
+                                        value="{{ closing_balance }}"
+                                        min="0"
+                                        step="0.01"
+                                        placeholder="Saldo final"
+                                        required
+                                    >
+
                                     {% for error in form.closing_balance.errors %}
-                                    <div class="invalid-feedback">{{ error }}</div>
+                                        <div class="invalid-feedback">
+                                            {{ error }}
+                                        </div>
                                     {% endfor %}
                                 </div>
-                                <button type="submit" class="btn btn-danger">Cerrar Caja</button>
+
+                                <button type="submit" class="btn btn-danger">
+                                    Cerrar Caja
+                                </button>
                             </div>
                         </form>
                         {% endif %}
@@ -78,60 +103,87 @@
                 <div class="card-header">
                     <i class="fas fa-chart-line me-1"></i> Resumen de Caja
                 </div>
+
                 <div class="card-body">
+
+                    <!-- Saldos declarados -->
                     <table class="table table-striped table-bordered mb-4">
                         <tbody>
                             <tr>
                                 <th scope="row">Saldo Inicial declarado</th>
-                                <td>${{ cash_register.opening_balance }}</td>
+                                <td>
+                                    ${{ cash_register.opening_balance }}
+                                </td>
                             </tr>
+
                             <tr>
                                 <th scope="row">Saldo Final declarado</th>
                                 <td>
                                     {% if cash_register.closing_balance %}
-                                    ${{ cash_register.closing_balance }}
+                                        ${{ cash_register.closing_balance }}
                                     {% else %}
-                                    No disponible
+                                        No disponible
                                     {% endif %}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- Resumen económico -->
                     <table class="table table-striped table-bordered">
                         <tbody>
+
+                            <!-- Dinero recibido físicamente en ventas en efectivo -->
                             <tr>
                                 <th scope="row">Ingresos por Efectivo</th>
-                                <td class="text-success">${{ efectivo_ingresos }}</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">Egresos por Efectivo</th>
-                                <td class="text-danger">-${{ vueltos }}</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">Movimientos</th>
-                                <td>
-                                    <span class="text-success">+${{ total_ingresos }}</span>
-                                    |
-                                    <span class="text-danger">-${{ total_egresos }}</span>
+                                <td class="text-success">
+                                    ${{ efectivo_ingresos|floatformat:2 }}
                                 </td>
                             </tr>
 
+                            <!-- Solo egresos reales registrados como movimientos -->
                             <tr>
-                                <th scope="row">Balance de movimientos</th>
-                                {% if movimientos < 0 %} <td class="text-danger">-${{ movimientos|cut:"-" }}</td>
-                                    {% elif movimientos > 0 %}
-                                    <td class="text-success">${{ movimientos }}</td>
-                                    {% else %}
-                                    <td>${{ movimientos }}</td>
-                                    {% endif %}
+                                <th scope="row">Egresos</th>
+                                <td class="text-danger">
+                                    -${{ total_egresos }}
+                                </td>
                             </tr>
 
+                            <!-- Ingresos manuales registrados como movimientos -->
+                            <tr>
+                                <th scope="row">Ingresos por Movimientos</th>
+                                <td class="text-success">
+                                    +${{ total_ingresos }}
+                                </td>
+                            </tr>
+
+                            <!-- Resultado neto de movimientos -->
+                            <tr>
+                                <th scope="row">Balance de movimientos</th>
+
+                                {% if movimientos < 0 %}
+                                    <td class="text-danger">
+                                        -${{ movimientos|cut:"-" }}
+                                    </td>
+                                {% elif movimientos > 0 %}
+                                    <td class="text-success">
+                                        ${{ movimientos }}
+                                    </td>
+                                {% else %}
+                                    <td>
+                                        ${{ movimientos }}
+                                    </td>
+                                {% endif %}
+                            </tr>
+
+                            <!-- Saldo físico esperado -->
                             <tr>
                                 <th scope="row">Saldo Final</th>
-                                <td>${{ balance_total }}</td>
+                                <td>
+                                    ${{ balance_total|floatformat:2 }}
+                                </td>
                             </tr>
+
                         </tbody>
                     </table>
                 </div>
@@ -142,8 +194,10 @@
                 <div class="card-header">
                     <h5>Ingresos por Método de Pago</h5>
                 </div>
+
                 <div class="card-body">
                     {% if payment_method_totals %}
+
                     <table class="table table-striped table-bordered">
                         <thead class="table-dark">
                             <tr>
@@ -151,17 +205,26 @@
                                 <th>Total Ingresos</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {% for payment in payment_method_totals %}
                             <tr>
-                                <td>{{ payment.payment_method__name }}</td>
-                                <td class="text-success">${{ payment.total|floatformat:2 }}</td>
+                                <td>
+                                    {{ payment.payment_method__name }}
+                                </td>
+
+                                <td class="text-success">
+                                    ${{ payment.total|floatformat:2 }}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+
                     {% else %}
-                    <p>No hay ingresos registrados por métodos de pago.</p>
+                        <p>
+                            No hay ingresos registrados por métodos de pago.
+                        </p>
                     {% endif %}
                 </div>
             </div>
@@ -171,8 +234,10 @@
                 <div class="card-header">
                     <h5>Movimientos de Caja</h5>
                 </div>
+
                 <div class="card-body">
                     <table class="table table-striped table-bordered">
+
                         <thead class="table-dark">
                             <tr>
                                 <th>Fecha</th>
@@ -181,58 +246,92 @@
                                 <th>Descripción</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {% for movement in cash_register.movements.all %}
                             <tr>
-                                <td>{{ movement.created_at }}</td>
-                                <td>{{ movement.get_type_display }}</td>
-                                <td
-                                    class="{% if movement.type == 'ingreso' %}text-success{% else %}text-danger{% endif %}">
-                                    ${{ movement.amount|floatformat:2 }}
+                                <td>
+                                    {{ movement.created_at }}
                                 </td>
-                                <td>{{ movement.description }}</td>
+
+                                <td>
+                                    {{ movement.get_type_display }}
+                                </td>
+
+                                <td class="{% if movement.type == 'ingreso' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if movement.type == 'ingreso' %}
+                                        +${{ movement.amount|floatformat:2 }}
+                                    {% else %}
+                                        -${{ movement.amount|floatformat:2 }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ movement.description }}
+                                </td>
                             </tr>
+
                             {% empty %}
                             <tr>
-                                <td colspan="4">No hay movimientos registrados.</td>
+                                <td colspan="4">
+                                    No hay movimientos registrados.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
+
                     </table>
                 </div>
             </div>
+
         </div>
 
-        <!-- Columna derecha: Movimiento de productos único -->
+        <!-- Columna derecha -->
         <div class="col-md-6">
+
+            <!-- Movimiento de productos -->
             <div class="card">
                 <div class="card-header">
                     <h5>Movimiento de productos</h5>
                 </div>
+
                 <div class="card-body">
                     <table class="table table-striped table-bordered">
+
                         <thead class="table-dark">
                             <tr>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {% for movement in lista_movimientos %}
                             <tr>
-                                <td>{{ movement.name }}</td>
-                                <td>{{ movement.total_quantity }}</td>
+                                <td>
+                                    {{ movement.name }}
+                                </td>
+
+                                <td>
+                                    {{ movement.total_quantity }}
+                                </td>
                             </tr>
+
                             {% empty %}
                             <tr>
-                                <td colspan="2">No hay movimientos registrados.</td>
+                                <td colspan="2">
+                                    No hay movimientos registrados.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
+
                     </table>
                 </div>
             </div>
+
         </div>
+
     </div>
 </div>
 {% endblock %}
