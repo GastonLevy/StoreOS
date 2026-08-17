@@ -6,14 +6,15 @@
         <div class="col-lg-12">
             <div class="card shadow-sm border-light">
                 <div class="card-body">
+
                     <h3 class="text-center font-weight-light my-4">
                         {% if item %}Editar producto{% else %}Crear producto{% endif %}
                     </h3>
 
-                    <!-- Mensajes de error generales -->
                     {% if form.errors %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <strong>¡Algo salió mal!</strong> Hay errores en el formulario:
+
                         <ul>
                             {% for field in form %}
                                 {% for error in field.errors %}
@@ -21,156 +22,476 @@
                                 {% endfor %}
                             {% endfor %}
                         </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close">
+                        </button>
                     </div>
                     {% endif %}
 
                     <form method="POST" id="itemForm">
                         {% csrf_token %}
 
-                        <!-- Campo Nombre -->
+                        <!-- Nombre -->
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}"
-                                id="name" name="name" value="{{ item.name|default_if_none:'' }}" required>
+                            <input
+                                type="text"
+                                class="form-control {% if form.name.errors %}is-invalid{% endif %}"
+                                id="name"
+                                name="name"
+                                value="{{ form.name.value|default_if_none:'' }}"
+                                required
+                            >
+
                             <label for="name">Nombre</label>
+
                             {% for error in form.name.errors %}
-                                <div class="invalid-feedback">{{ error }}</div>
+                                <div class="invalid-feedback">
+                                    {{ error }}
+                                </div>
                             {% endfor %}
                         </div>
 
-                        <!-- Campo Código de Barras -->
+                        <!-- Código de Barras -->
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control {% if form.barcode.errors %}is-invalid{% endif %}"
-                                id="barcode" name="barcode" value="{{ item.barcode|default_if_none:'' }}">
-                            <label for="barcode">Código de barras</label>
+                            <input
+                                type="text"
+                                class="form-control {% if form.barcode.errors %}is-invalid{% endif %}"
+                                id="barcode"
+                                name="barcode"
+                                value="{{ form.barcode.value|default_if_none:'' }}"
+                            >
+
+                            <label for="barcode">
+                                Código de barras
+                            </label>
+
                             {% for error in form.barcode.errors %}
-                                <div class="invalid-feedback">{{ error }}</div>
+                                <div class="invalid-feedback">
+                                    {{ error }}
+                                </div>
                             {% endfor %}
                         </div>
 
-                        <!-- Fila para Stockable y Cantidad -->
+                        <!-- Cantidad + No contabilizar -->
                         <div class="row mb-3">
-                            <!-- Campo Cantidad -->
+
                             <div class="col-md-10">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control {% if form.quantity.errors %}is-invalid{% endif %}"
-                                        id="quantity" name="quantity" value="{{ item.quantity|default_if_none:'' }}" required>
-                                    <label for="quantity">Cantidad</label>
+                                    <input
+                                        type="number"
+                                        class="form-control {% if form.quantity.errors %}is-invalid{% endif %}"
+                                        id="quantity"
+                                        name="quantity"
+                                        value="{{ form.quantity.value|default_if_none:'' }}"
+                                        required
+                                    >
+
+                                    <label for="quantity">
+                                        Cantidad
+                                    </label>
+
                                     {% for error in form.quantity.errors %}
-                                        <div class="invalid-feedback">{{ error }}</div>
+                                        <div class="invalid-feedback">
+                                            {{ error }}
+                                        </div>
                                     {% endfor %}
                                 </div>
                             </div>
 
-                            <!-- Campo Stockable -->
                             <div class="col-md-2 d-flex align-items-center justify-content-center">
                                 <div class="form-check">
-                                    <input type="checkbox"
+
+                                    <input
+                                        type="checkbox"
                                         class="form-check-input {% if form.stockable.errors %}is-invalid{% endif %}"
-                                        id="stockable" name="stockable" {% if item and item.stockable %}checked{% endif %}>
-                                    <label class="form-check-label" for="stockable">No contabilizar.</label>
+                                        id="stockable"
+                                        name="stockable"
+                                        {% if form.stockable.value %}checked{% endif %}
+                                    >
+
+                                    <label
+                                        class="form-check-label"
+                                        for="stockable">
+                                        No contabilizar
+                                    </label>
+
                                     {% for error in form.stockable.errors %}
-                                        <div class="invalid-feedback">{{ error }}</div>
+                                        <div class="invalid-feedback">
+                                            {{ error }}
+                                        </div>
                                     {% endfor %}
                                 </div>
                             </div>
+
                         </div>
 
-                        <!-- Campo Descripción -->
+                        <!-- Descripción -->
                         <div class="form-floating mb-3">
-                            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}"
-                                id="description" name="description" style="height: 100px;">{{ item.description|default_if_none:'' }}</textarea>
-                            <label for="description">Descripción</label>
+                            <textarea
+                                class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                                id="description"
+                                name="description"
+                                style="height: 100px;"
+                            >{{ form.description.value|default_if_none:'' }}</textarea>
+
+                            <label for="description">
+                                Descripción
+                            </label>
+
                             {% for error in form.description.errors %}
-                                <div class="invalid-feedback">{{ error }}</div>
+                                <div class="invalid-feedback">
+                                    {{ error }}
+                                </div>
                             {% endfor %}
                         </div>
 
-                        <!-- Campo Precio -->
+                        <!-- Precio de venta -->
                         <div class="form-floating mb-3">
-                            <input type="number" class="form-control {% if form.price.errors %}is-invalid{% endif %}"
-                                id="price" name="price" value="{{ item.price|default_if_none:0 }}" min="0" step="1.00" required>
-                            <label for="price">Precio</label>
+                            <input
+                                type="number"
+                                class="form-control {% if form.price.errors %}is-invalid{% endif %}"
+                                id="price"
+                                name="price"
+                                value="{{ form.price.value|default_if_none:0 }}"
+                                min="0"
+                                step="0.01"
+                                required
+                            >
+
+                            <label for="price">
+                                Precio de venta
+                            </label>
+
                             {% for error in form.price.errors %}
-                                <div class="invalid-feedback">{{ error }}</div>
+                                <div class="invalid-feedback">
+                                    {{ error }}
+                                </div>
                             {% endfor %}
                         </div>
 
-                        <!-- Campo Costo -->
-                        <div class="form-floating mb-3">
-                            <input type="number" class="form-control {% if form.cost.errors %}is-invalid{% endif %}"
-                                id="cost" name="cost" value="{{ item.cost|default_if_none:0 }}" min="0" step="0.01" required>
-                            <label for="cost">Costo</label>
-                            {% for error in form.cost.errors %}
-                                <div class="invalid-feedback">{{ error }}</div>
-                            {% endfor %}
+                        <!-- Costo + Porcentaje + Cálculo automático -->
+                        <div class="row mb-3">
+
+                            <!-- Costo -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input
+                                        type="number"
+                                        class="form-control {% if form.cost.errors %}is-invalid{% endif %}"
+                                        id="cost"
+                                        name="cost"
+                                        value="{{ form.cost.value|default_if_none:0 }}"
+                                        min="0"
+                                        step="0.01"
+                                        required
+                                    >
+
+                                    <label for="cost">
+                                        Costo
+                                    </label>
+
+                                    {% for error in form.cost.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Porcentaje -->
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input
+                                        type="number"
+                                        class="form-control {% if form.percentage.errors %}is-invalid{% endif %}"
+                                        id="percentage"
+                                        name="percentage"
+                                        value="{{ form.percentage.value|default_if_none:'' }}"
+                                        min="0"
+                                        step="0.01"
+                                    >
+
+                                    <label for="percentage">
+                                        Ganancia %
+                                    </label>
+
+                                    {% for error in form.percentage.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Cálculo automático -->
+                            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                <div class="form-check form-switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input {% if form.is_calculated.errors %}is-invalid{% endif %}"
+                                        id="is_calculated"
+                                        name="is_calculated"
+                                        {% if form.is_calculated.value %}checked{% endif %}
+                                    >
+
+                                    <label
+                                        class="form-check-label"
+                                        for="is_calculated">
+                                        Calcular precio
+                                    </label>
+
+                                    {% for error in form.is_calculated.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- Campo oculto para enviar 0 si está deshabilitado -->
-                        <input type="hidden" id="quantity_hidden" name="quantity" value="0">
+                        <!-- Cantidad alternativa cuando no se contabiliza -->
+                        <input
+                            type="hidden"
+                            id="quantity_hidden"
+                            name="quantity"
+                            value="0"
+                        >
 
-                        <!-- Campo Categorías con Choices.js -->
+                        <!-- Categorías -->
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <label for="categories" class="form-label">Categorías</label>
-                                <select class="form-select choices {% if form.categories.errors %}is-invalid{% endif %}"
-                                    id="categories" name="categories" multiple>
+
+                                <label
+                                    for="categories"
+                                    class="form-label">
+                                    Categorías
+                                </label>
+
+                                <select
+                                    class="form-select choices {% if form.categories.errors %}is-invalid{% endif %}"
+                                    id="categories"
+                                    name="categories"
+                                    multiple>
+
                                     {% for category in categories %}
-                                        <option value="{{ category.id }}" {% if item and category in item.categories.all %}selected{% endif %}>{{ category.name }}</option>
+                                        <option
+                                            value="{{ category.id }}"
+                                            {% if form.is_bound %}
+                                                {% if category.pk|stringformat:"s" in form.categories.value %}
+                                                    selected
+                                                {% endif %}
+                                            {% elif item and category in item.categories.all %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            {{ category.name }}
+                                        </option>
                                     {% endfor %}
+
                                 </select>
+
                                 {% for error in form.categories.errors %}
-                                    <div class="invalid-feedback">{{ error }}</div>
+                                    <div class="invalid-feedback">
+                                        {{ error }}
+                                    </div>
                                 {% endfor %}
+
                             </div>
                         </div>
 
                         <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                            <a href="{% url 'item-list' %}" class="btn btn-secondary">Cancelar</a>
-                            <button type="submit" class="btn btn-primary">{% if item %}Actualizar{% else %}Crear{% endif %}</button>
+
+                            <a
+                                href="{% url 'item-list' %}"
+                                class="btn btn-secondary">
+                                Cancelar
+                            </a>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+                                {% if item %}
+                                    Actualizar
+                                {% else %}
+                                    Crear
+                                {% endif %}
+                            </button>
+
                         </div>
+
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Importación de Choices.js -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+
+<!-- Choices.js -->
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
+>
+
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const choices = new Choices('.choices', {
-            removeItemButton: true,
-            placeholder: true,
-            placeholderValue: 'Selecciona una o más categorías' // Placeholder para el selector
-        });
+document.addEventListener('DOMContentLoaded', function () {
 
-        // Referencias a los elementos
-        const stockableCheckbox = document.getElementById('stockable');
-        const quantityField = document.getElementById('quantity');
-        const quantityHiddenField = document.getElementById('quantity_hidden');  // Campo oculto
+    /*
+     * Categorías
+     */
+    new Choices('.choices', {
+        removeItemButton: true,
+        placeholder: true,
+        placeholderValue: 'Selecciona una o más categorías'
+    });
 
-        // Función para manejar la habilitación/deshabilitación de la cantidad
-        function toggleQuantityField() {
-            if (stockableCheckbox.checked) {
-                quantityHiddenField.value = 0;  // Asigna 0 al campo oculto cuando se selecciona el checkbox
-                quantityField.disabled = true;  // Deshabilita el campo cantidad
-                quantityField.name = "";       // Remueve el atributo name para que no se envíe
-                quantityHiddenField.name = "quantity";  // Asigna el name al campo oculto
-            } else {
-                quantityField.disabled = false;  // Habilita el campo cantidad
-                quantityField.name = "quantity"; // Asigna el name al campo visible
-                quantityHiddenField.name = "";   // Remueve el atributo name del campo oculto
-            }
+
+    /*
+     * Cantidad / No contabilizar
+     */
+    const stockableCheckbox = document.getElementById('stockable');
+    const quantityField = document.getElementById('quantity');
+    const quantityHiddenField = document.getElementById('quantity_hidden');
+
+
+    function toggleQuantityField() {
+
+        if (stockableCheckbox.checked) {
+
+            quantityHiddenField.value = 0;
+
+            quantityField.disabled = true;
+            quantityField.name = "";
+
+            quantityHiddenField.name = "quantity";
+
+        } else {
+
+            quantityField.disabled = false;
+            quantityField.name = "quantity";
+
+            quantityHiddenField.name = "";
+
         }
 
-        // Inicializa el estado del campo cantidad en función del estado actual de stockable
-        toggleQuantityField();
+    }
 
-        // Evento cuando se cambia el checkbox stockable
-        stockableCheckbox.addEventListener('change', toggleQuantityField);
-    });
+
+    toggleQuantityField();
+
+    stockableCheckbox.addEventListener(
+        'change',
+        toggleQuantityField
+    );
+
+
+    /*
+     * Precio automático
+     */
+    const costField = document.getElementById('cost');
+    const priceField = document.getElementById('price');
+    const percentageField = document.getElementById('percentage');
+    const calculatedCheckbox = document.getElementById('is_calculated');
+
+
+    function calculatePrice() {
+
+        if (!calculatedCheckbox.checked) {
+            return;
+        }
+
+        const cost = parseFloat(costField.value) || 0;
+        const percentage = parseFloat(percentageField.value) || 0;
+
+        const calculatedPrice = cost * (
+            1 + percentage / 100
+        );
+
+        priceField.value = calculatedPrice.toFixed(2);
+    }
+
+
+    function toggleCalculatedPrice() {
+
+        if (calculatedCheckbox.checked) {
+
+            /*
+             * El porcentaje puede editarse.
+             */
+            percentageField.readOnly = false;
+            percentageField.required = true;
+
+            /*
+             * El precio es controlado por el cálculo.
+             */
+            priceField.readOnly = true;
+
+            calculatePrice();
+
+        } else {
+
+            /*
+             * Conservamos el porcentaje almacenado,
+             * pero no permitimos editarlo mientras
+             * el cálculo automático esté desactivado.
+             */
+            percentageField.readOnly = true;
+            percentageField.required = false;
+
+            /*
+             * El precio vuelve a ser manual.
+             */
+            priceField.readOnly = false;
+
+        }
+
+    }
+
+
+    /*
+     * Cambiar costo recalcula el precio
+     */
+    costField.addEventListener(
+        'input',
+        calculatePrice
+    );
+
+
+    /*
+     * Cambiar porcentaje recalcula el precio
+     */
+    percentageField.addEventListener(
+        'input',
+        calculatePrice
+    );
+
+
+    /*
+     * Activar/desactivar cálculo automático
+     */
+    calculatedCheckbox.addEventListener(
+        'change',
+        toggleCalculatedPrice
+    );
+
+
+    /*
+     * Estado inicial al cargar el formulario
+     */
+    toggleCalculatedPrice();
+
+});
 </script>
+
 {% endblock %}

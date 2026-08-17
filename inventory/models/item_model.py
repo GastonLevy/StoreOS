@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from .category_model import Category
 from users.models import Company
 
+
 class Item(models.Model):
     """
     Represents an inventory item.
@@ -17,13 +18,22 @@ class Item(models.Model):
         categories (ManyToMany): Related categories.
         company (ForeignKey): Company owning the item.
         cost (Decimal): Cost charged by the supplier, non-negative.
+        is_calculated (bool): Whether the sale price is calculated automatically.
+        percentage (Decimal): Profit percentage applied over cost.
         hide (bool): Whether to hide the item in lists and searches.
 
     Methods:
         __str__: Returns the item's name.
     """
+
     name = models.CharField(max_length=100)
-    barcode = models.CharField(max_length=100, blank=True, null=True)
+
+    barcode = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -35,9 +45,20 @@ class Item(models.Model):
     quantity = models.IntegerField()
 
     stockable = models.BooleanField(default=False)
+
     description = models.TextField(blank=True)
-    categories = models.ManyToManyField(Category, related_name='items', blank=True)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='items')
+
+    categories = models.ManyToManyField(
+        Category,
+        related_name='items',
+        blank=True
+    )
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='items'
+    )
 
     cost = models.DecimalField(
         max_digits=10,
@@ -46,6 +67,21 @@ class Item(models.Model):
         default=0.00,
         help_text="Costo que el proveedor cobra por el artículo"
     )
+
+    is_calculated = models.BooleanField(
+        default=False,
+        help_text="Calcular automáticamente el precio de venta según porcentaje"
+    )
+
+    percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        null=True,
+        blank=True,
+        help_text="Porcentaje de ganancia aplicado sobre el costo"
+    )
+
     hide = models.BooleanField(
         default=False,
         help_text="Ocultar el ítem en listas y búsquedas"
