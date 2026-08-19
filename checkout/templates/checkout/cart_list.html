@@ -65,11 +65,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if cart.payment_method %}
-                                {{ cart.payment_method.name }}
-                            {% else %}
-                                No especificado
-                            {% endif %}
+                            {{ cart.payment_methods_display }}
                         </td>
                         <td>
                             {% if cart.client %}

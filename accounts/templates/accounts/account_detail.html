@@ -87,7 +87,7 @@
                                 <td>{{ debt.amount }}</td>
                                 <td>
                                     {% if debt.cart %}
-                                        {% if debt.cart.payment_method.name != "Cuenta Corriente" %}
+                                        {% if debt.status == "pagado" or not debt.cart.is_current_account_sale %}
                                             <span class="text-success">Pagado</span>
                                         {% else %}
                                             {% if debt.due_date %}

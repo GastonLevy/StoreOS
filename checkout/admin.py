@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cart, CartLine, PaymentMethod
+from .models import Cart, CartLine, CartPayment, PaymentMethod
 
 # Administrador para Cart
 @admin.register(Cart)
@@ -17,6 +17,25 @@ class CartLineAdmin(admin.ModelAdmin):
     search_fields = ('cart__user__username', 'item__name')  # Permite buscar por usuario del carrito y nombre del item
     list_filter = ('cart', 'item')  # Permite filtrar por carrito e item
     ordering = ('cart',)  # Ordena por carrito por defecto
+
+
+@admin.register(CartPayment)
+class CartPaymentAdmin(admin.ModelAdmin):
+    list_display = (
+        'cart',
+        'payment_method',
+        'amount',
+        'received_amount',
+        'change_amount',
+        'created_at',
+    )
+    search_fields = (
+        'cart__id',
+        'cart__user__username',
+        'payment_method__name',
+    )
+    list_filter = ('payment_method', 'created_at')
+    ordering = ('-created_at',)
 
 
 
