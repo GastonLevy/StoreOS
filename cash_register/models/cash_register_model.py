@@ -51,11 +51,22 @@ class CashRegister(models.Model):
         Raises:
             None explicitly.
         """
-        # Sum of completed carts total prices
-        sales = sum(cart.total_price() for cart in self.carts.filter(is_completed=True))
+        from checkout.models import CartPayment
+
+        completed_carts = self.carts.filter(
+            company=self.company,
+            is_completed=True
+        ).distinct()
+        cash_sales = sum(
+            payment.amount
+            for payment in CartPayment.objects.filter(
+                cart__in=completed_carts,
+                payment_method__name='Efectivo'
+            )
+        )
         # Sum of income movements
         total_income = sum(m.amount for m in self.movements.filter(type='ingreso'))
         # Sum of expense movements
         total_expense = sum(m.amount for m in self.movements.filter(type='egreso'))
 
-        return self.opening_balance + sales + total_income - total_expense
+        return self.opening_balance + cash_sales + total_income - total_expense

@@ -1,7 +1,6 @@
-from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Q
 from ..models import CashRegister, CashMovement
-from checkout.models import Cart
+from checkout.models import CartPayment
 
 def cash_register_status(request):
     """
@@ -46,27 +45,16 @@ def cash_register_amount(request):
         if not cash_register:
             return {'actual_amount': 0}  # Return default if no open cash register
 
-        # Get the current uncompleted cart for user and company
-        cart = Cart.objects.filter(
-            user=user,
+        completed_carts = cash_register.carts.filter(
             company=company,
-            is_completed=False
-        ).first()
+            is_completed=True
+        ).distinct()
+        cash_payments = CartPayment.objects.filter(
+            cart__in=completed_carts,
+            payment_method__name='Efectivo'
+        ).aggregate(total=Sum('amount'))['total'] or 0
 
-        # Calculate total change returned and cash payments in completed carts linked to cash_register
-        change_returned = sum(
-            c.payment_return or 0 for c in cash_register.carts.filter(
-                payment_method__name='Efectivo', is_completed=True
-            )
-        )
-        cash_payments = sum(
-            c.paid_amount or 0 for c in cash_register.carts.filter(
-                payment_method__name='Efectivo', is_completed=True
-            )
-        )
-
-        # Calculate total balance (opening balance + cash payments - change returned)
-        total_balance = cash_register.opening_balance + cash_payments - change_returned
+        total_balance = cash_register.opening_balance + cash_payments
 
         # Get cash movements (income and expenses) with payment method 'Efectivo'
         cash_movements = CashMovement.objects.filter(

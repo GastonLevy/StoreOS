@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Sum
 from users.models import Company
 
 
@@ -20,12 +19,18 @@ class Person(models.Model):
         - Debts linked to carts with payment method 'Cuenta Corriente'
         - Debts without cart
         """
-        debts = self.debts.filter(
-            models.Q(cart__isnull=True) |
-            models.Q(cart__payment_method__name="Cuenta Corriente")
-        )
+        total = 0
 
-        return debts.aggregate(total=Sum('amount'))['total'] or 0
+        for debt in self.debts.select_related('cart'):
+            if debt.cart is None:
+                total += debt.amount
+            elif (
+                debt.status == 'pendiente'
+                and debt.cart.is_current_account_sale
+            ):
+                total += debt.amount
+
+        return total
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
