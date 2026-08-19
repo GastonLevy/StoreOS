@@ -37,6 +37,7 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    finalized_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     client = models.ForeignKey('accounts.Person', null=True, blank=True, on_delete=models.CASCADE, related_name='carts')  # Use string notation to avoid circular import
 
     def __str__(self):
@@ -51,3 +52,9 @@ class Cart(models.Model):
         """
         total = sum(item.total for item in self.cart_lines.all())
         return total
+
+    def sale_total(self):
+        if self.finalized_total is not None:
+            return self.finalized_total
+
+        return self.total_price()

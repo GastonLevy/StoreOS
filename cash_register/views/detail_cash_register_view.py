@@ -1,9 +1,12 @@
-from django.shortcuts import render, get_object_or_404
-from ..models.cash_register_model import CashRegister
-from checkout.models import CartLine
+from decimal import Decimal
+
 from django.contrib.auth.models import Group
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404, render
+
+from checkout.models import CartLine
 from storeos.decorators import role_required
+from ..models.cash_register_model import CashRegister
 
 
 @role_required('Admin', 'Cajero', 'Detalle_Caja')
@@ -36,7 +39,7 @@ def cash_register_detail_view(request, pk):
 
     completed_carts = cash_register.carts.filter(
         is_completed=True
-    )
+    ).distinct()
 
     # Total sales from all completed carts
     ingresos = sum(
@@ -80,32 +83,32 @@ def cash_register_detail_view(request, pk):
     )
 
     # Income grouped by payment method
-    payment_method_totals = (
-        completed_carts
-        .values('payment_method__name')
-        .annotate(total=Sum('cart_lines__quantity'))
-        .order_by('-total')
-    )
+    payment_method_totals_by_name = {}
 
-    # Calculate actual amount per payment method
-    for payment in payment_method_totals:
-        payment_method_name = payment['payment_method__name']
-
-        if payment_method_name is None:
-            payment['payment_method__name'] = 'Sin método de pago'
-
-            carts = completed_carts.filter(
-                payment_method__isnull=True
-            )
-        else:
-            carts = completed_carts.filter(
-                payment_method__name=payment_method_name
-            )
-
-        payment['total'] = sum(
-            cart.total_price()
-            for cart in carts
+    for cart in completed_carts.select_related('payment_method'):
+        payment_method_name = (
+            cart.payment_method.name
+            if cart.payment_method
+            else 'Sin método de pago'
         )
+
+        payment_method_totals_by_name.setdefault(
+            payment_method_name,
+            Decimal('0.00')
+        )
+        payment_method_totals_by_name[payment_method_name] += cart.sale_total()
+
+    payment_method_totals = [
+        {
+            'payment_method__name': payment_method_name,
+            'total': total,
+        }
+        for payment_method_name, total in payment_method_totals_by_name.items()
+    ]
+    payment_method_totals.sort(
+        key=lambda payment: payment['total'],
+        reverse=True
+    )
 
     # Total quantity moved per item in completed carts
     item_movement = (

@@ -74,13 +74,13 @@ def finalize_cart(request, cart_id):
                 cash_register.carts.add(cart)
 
             cart.payment_method = payment_method
+            total_price = cart.total_price()
+            cart.finalized_total = total_price
 
             if payment_method.name == 'Efectivo':
                 paid_amount = Decimal(
                     request.POST.get('paid_amount', '0')
                 )
-
-                total_price = cart.total_price()
 
                 cart.payment_return = paid_amount - total_price
                 cart.paid_amount = paid_amount
@@ -101,7 +101,7 @@ def finalize_cart(request, cart_id):
                 if payment_method.name != "Cuenta Corriente":
                     Debt.objects.create(
                         person=person,
-                        amount=cart.total_price(),
+                        amount=total_price,
                         cart=cart,
                         company=company,
                         status='pagado'
@@ -109,7 +109,7 @@ def finalize_cart(request, cart_id):
                 else:
                     Debt.objects.create(
                         person=person,
-                        amount=-cart.total_price(),
+                        amount=-total_price,
                         cart=cart,
                         company=company,
                         status='pendiente'
