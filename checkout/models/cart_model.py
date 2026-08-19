@@ -58,3 +58,49 @@ class Cart(models.Model):
             return self.finalized_total
 
         return self.total_price()
+
+    def payments_total(self):
+        return sum(
+            payment.amount
+            for payment in self.payments.all()
+        )
+
+    def cash_payments_total(self):
+        return sum(
+            payment.amount
+            for payment in self.payments.filter(
+                payment_method__name='Efectivo'
+            )
+        )
+
+    def has_payment_method(self, payment_method_name):
+        if self.payments.filter(
+            payment_method__name=payment_method_name
+        ).exists():
+            return True
+
+        if not self.payments.exists() and self.payment_method:
+            return self.payment_method.name == payment_method_name
+
+        return False
+
+    @property
+    def is_current_account_sale(self):
+        return self.has_payment_method('Cuenta Corriente')
+
+    @property
+    def payment_methods_display(self):
+        payments = list(
+            self.payments.select_related('payment_method')
+        )
+
+        if payments:
+            return ', '.join(
+                payment.payment_method.name
+                for payment in payments
+            )
+
+        if self.payment_method:
+            return self.payment_method.name
+
+        return 'No especificado'

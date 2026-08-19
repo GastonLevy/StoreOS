@@ -1,10 +1,8 @@
-from decimal import Decimal
-
 from django.contrib.auth.models import Group
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, render
 
-from checkout.models import CartLine
+from checkout.models import CartLine, CartPayment
 from storeos.decorators import role_required
 from ..models.cash_register_model import CashRegister
 
@@ -38,6 +36,7 @@ def cash_register_detail_view(request, pk):
         )
 
     completed_carts = cash_register.carts.filter(
+        company=cash_register.company,
         is_completed=True
     ).distinct()
 
@@ -50,8 +49,9 @@ def cash_register_detail_view(request, pk):
     # Real sales paid in cash.
     # This is the sale amount, NOT the amount handed over by the customer.
     efectivo_ingresos = sum(
-        cart.total_price()
-        for cart in completed_carts.filter(
+        payment.amount
+        for payment in CartPayment.objects.filter(
+            cart__in=completed_carts,
             payment_method__name='Efectivo'
         )
     )
@@ -83,31 +83,12 @@ def cash_register_detail_view(request, pk):
     )
 
     # Income grouped by payment method
-    payment_method_totals_by_name = {}
-
-    for cart in completed_carts.select_related('payment_method'):
-        payment_method_name = (
-            cart.payment_method.name
-            if cart.payment_method
-            else 'Sin método de pago'
-        )
-
-        payment_method_totals_by_name.setdefault(
-            payment_method_name,
-            Decimal('0.00')
-        )
-        payment_method_totals_by_name[payment_method_name] += cart.sale_total()
-
-    payment_method_totals = [
-        {
-            'payment_method__name': payment_method_name,
-            'total': total,
-        }
-        for payment_method_name, total in payment_method_totals_by_name.items()
-    ]
-    payment_method_totals.sort(
-        key=lambda payment: payment['total'],
-        reverse=True
+    payment_method_totals = (
+        CartPayment.objects
+        .filter(cart__in=completed_carts)
+        .values('payment_method__name')
+        .annotate(total=Sum('amount'))
+        .order_by('-total')
     )
 
     # Total quantity moved per item in completed carts

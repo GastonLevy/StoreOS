@@ -22,7 +22,9 @@ def cart_list(request):
         carts = carts.filter(user_id=selected_user)
 
     if selected_payment_method:
-        carts = carts.filter(payment_method_id=selected_payment_method)
+        carts = carts.filter(
+            payments__payment_method_id=selected_payment_method
+        ).distinct()
 
     if date_query:
         try:
