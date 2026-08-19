@@ -98,76 +98,227 @@
     <!-- Detalles del carrito -->
     <div class="card mb-4">
         <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                 <div>
                     <i class="fas fa-shopping-cart me-1"></i> Productos en el Carrito
                 </div>
+                <a href="{% url 'cart-list' %}" class="btn btn-secondary btn-sm">Volver a la lista</a>
+            </div>
                 {% if cart.is_completed %}
-                    <div class="card mb-4">
+                    <div class="card mt-3 mb-4">
                         <div class="card-header">
-                            <h5>Método de Pago: {{ cart.payment_method.name }}</h5>
+                            <h5>Pagos</h5>
                         </div>
                         <div class="card-body">
                             <p class="font-weight-bold">Total General: ${{ total_general|floatformat:2 }}</p>
-                            {% if cart.payment_method.name == "Efectivo" %}
-                                <p class="font-weight-bold">Vuelto: ${{ cart.payment_return|floatformat:2 }}</p>
-                            {% endif %}
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Método</th>
+                                        <th>Importe</th>
+                                        <th>Entrega</th>
+                                        <th>Vuelto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in cart_payments %}
+                                    <tr>
+                                        <td>{{ payment.payment_method.name }}</td>
+                                        <td>${{ payment.amount|floatformat:2 }}</td>
+                                        <td>
+                                            {% if payment.received_amount %}
+                                                ${{ payment.received_amount|floatformat:2 }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if payment.change_amount %}
+                                                ${{ payment.change_amount|floatformat:2 }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4">No hay pagos registrados.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 {% endif %}
                 {% if not cart.is_completed %}
-                <form method="post" action="{% url 'cart-finalize' cart.id %}" id="finalize-cart-form" class="d-flex align-items-center gap-2 flex-wrap">
+                <form method="post" action="{% url 'cart-finalize' cart.id %}" id="finalize-cart-form" class="w-100 mt-3">
                     {% csrf_token %}
-                    <div class="form-group">
-                        <label for="payment-method" class="form-label">Método de Pago</label>
-                        <select name="payment_method" id="payment-method" class="form-control" required>
-                            {% for method in payment_methods %}
-                                <option value="{{ method.id }}" {% if method.name == "Efectivo" %}selected{% endif %}>{{ method.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <div class="d-flex flex-wrap gap-3 align-items-end">
+                        <div class="form-group">
+                            <label for="person" class="form-label">Cliente (Opcional)</label>
+                            <select name="person" id="person" class="form-control">
+                                <option value="" selected>-</option>
+                                {% for person in persons %}
+                                    <option value="{{ person.id }}">{{ person.first_name }} {{ person.last_name }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No hay personas disponibles</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                    <div class="form-group" id="cash-payment-fields" style="display: {% if payment_methods.0.name == 'Efectivo' %}block{% else %}none{% endif %};">
-                        <label for="paid-amount" class="form-label">Paga con</label>
-                        <input type="number" step="0.01" name="paid_amount" id="paid-amount" class="form-control" placeholder="Cantidad pagada">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="person" class="form-label">Cliente (Opcional)</label>
-                        <select name="person" id="person" class="form-control">
-                            <option value="" selected>-</option>
-                            {% for person in persons %}
-                                <option value="{{ person.id }}">{{ person.first_name }} {{ person.last_name }}</option>
-                            {% empty %}
-                                <option value="" disabled>No hay personas disponibles</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="border p-3 rounded bg-light" style="min-height: 100px;">
-                        <button type="button" class="btn btn-success btn-sm w-100" id="finalize-cart-btn" onclick="confirmFinalizeCart()" disabled>
-                            Cobrar. (${{ total_general|floatformat:2 }})
-                        </button>
-                        <div id="cash-payment-fields-finalize" style="display: {% if payment_methods.0.name == 'Efectivo' %}block{% else %}none{% endif %};">
-                            <div class="mt-4" style="visibility: {% if payment_methods.0.name == 'Efectivo' and change_amount != 0 %}visible{% else %}hidden{% endif %};">
-                                <label for="change-amount" class="form-label">Vuelto</label>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span id="change-amount" class="text-muted">-</span>
-                                    <span class="badge bg-primary" id="vuelto-badge">{{ change_amount|floatformat:2 }}</span>
-                                </div>
-                            </div>
+                        <div>
+                            <div>Total: $<span id="payment-total">{{ total_general|floatformat:2 }}</span></div>
+                            <div>Total asignado: $<span id="payment-assigned">0.00</span></div>
+                            <div>Restante: $<span id="payment-remaining">{{ total_general|floatformat:2 }}</span></div>
                         </div>
                     </div>
-                
-                
 
-                    <button type="submit" class="btn btn-success btn-sm" id="confirm-finalize-cart-btn" style="display: none;" disabled>
-                        Realizar la transacción. (${{ total_general|floatformat:2 }})
-                    </button>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-bordered align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Método</th>
+                                    <th>Importe</th>
+                                    <th>Entrega cliente</th>
+                                    <th>Vuelto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="payment-rows"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm" id="add-payment-row">
+                            Agregar pago
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" id="finalize-cart-btn" onclick="confirmFinalizeCart()" disabled>
+                            Cobrar. (${{ total_general|floatformat:2 }})
+                        </button>
+                        <button type="submit" class="btn btn-success btn-sm" id="confirm-finalize-cart-btn" style="display: none;" disabled>
+                            Realizar la transacción. (${{ total_general|floatformat:2 }})
+                        </button>
+                    </div>
+
+                    <template id="payment-row-template">
+                        <tr class="payment-row">
+                            <td>
+                                <select name="payment_method" class="form-control payment-method" required>
+                                    {% for method in payment_methods %}
+                                        <option value="{{ method.id }}" data-name="{{ method.name }}" {% if method.name == "Efectivo" %}selected{% endif %}>{{ method.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" min="0.01" name="payment_amount" class="form-control payment-amount" required>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" min="0" name="received_amount" class="form-control received-amount">
+                            </td>
+                            <td>
+                                <span class="payment-change">-</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm remove-payment-row">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const rows = document.getElementById('payment-rows');
+                            const template = document.getElementById('payment-row-template');
+                            const addButton = document.getElementById('add-payment-row');
+                            const finalizeButton = document.getElementById('finalize-cart-btn');
+                            const confirmButton = document.getElementById('confirm-finalize-cart-btn');
+                            const assigned = document.getElementById('payment-assigned');
+                            const remaining = document.getElementById('payment-remaining');
+
+                            if (!rows || !template) {
+                                return;
+                            }
+
+                            const total = Number('{{ total_general|floatformat:2 }}'.replace(',', '.')) || 0;
+
+                            function selectedMethodName(row) {
+                                const select = row.querySelector('.payment-method');
+                                return select.options[select.selectedIndex].dataset.name;
+                            }
+
+                            function updateRow(row) {
+                                const isCash = selectedMethodName(row) === 'Efectivo';
+                                const amountInput = row.querySelector('.payment-amount');
+                                const receivedInput = row.querySelector('.received-amount');
+                                const change = row.querySelector('.payment-change');
+                                const amount = Number(amountInput.value || 0);
+                                const received = Number(receivedInput.value || 0);
+
+                                receivedInput.disabled = !isCash;
+
+                                if (!isCash) {
+                                    receivedInput.value = '';
+                                    change.textContent = '-';
+                                    return true;
+                                }
+
+                                if (receivedInput.value === '') {
+                                    change.textContent = '-';
+                                    return amount > 0;
+                                }
+
+                                const changeAmount = received - amount;
+                                change.textContent = changeAmount >= 0 ? changeAmount.toFixed(2) : 'Insuficiente';
+                                return changeAmount >= 0;
+                            }
+
+                            function updateTotals() {
+                                let paid = 0;
+                                let rowsValid = rows.querySelectorAll('.payment-row').length > 0;
+
+                                rows.querySelectorAll('.payment-row').forEach(function (row) {
+                                    const amount = Number(row.querySelector('.payment-amount').value || 0);
+                                    paid += amount;
+
+                                    if (amount <= 0 || !updateRow(row)) {
+                                        rowsValid = false;
+                                    }
+                                });
+
+                                const diff = total - paid;
+                                assigned.textContent = paid.toFixed(2);
+                                remaining.textContent = diff.toFixed(2);
+
+                                const isBalanced = Math.abs(diff) < 0.005;
+                                finalizeButton.disabled = !(rowsValid && isBalanced);
+                                confirmButton.disabled = !(rowsValid && isBalanced);
+                            }
+
+                            function addRow(amount = '') {
+                                const clone = template.content.cloneNode(true);
+                                rows.appendChild(clone);
+                                const row = rows.lastElementChild;
+                                row.querySelector('.payment-amount').value = amount;
+                                row.addEventListener('input', updateTotals);
+                                row.addEventListener('change', updateTotals);
+                                row.querySelector('.remove-payment-row').addEventListener('click', function () {
+                                    row.remove();
+                                    updateTotals();
+                                });
+                                updateTotals();
+                            }
+
+                            addButton.addEventListener('click', function () {
+                                const currentAssigned = Number(assigned.textContent || 0);
+                                const remainder = Math.max(total - currentAssigned, 0);
+                                addRow(remainder ? remainder.toFixed(2) : '');
+                            });
+
+                            addRow(total ? total.toFixed(2) : '');
+                        });
+                    </script>
                 </form>
                 {% endif %}
-                <a href="{% url 'cart-list' %}" class="btn btn-primary">Volver a la lista</a>
-            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -386,6 +537,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const finalizeCartBtn = document.getElementById('finalize-cart-btn');
     const confirmFinalizeCartBtn = document.getElementById('confirm-finalize-cart-btn');
     const total = {{ total_general|floatformat:2 }};
+
+    if (!paymentMethodSelect) {
+        return;
+    }
 
     // Mostrar/Ocultar campos según método de pago
     function toggleCashFields() {

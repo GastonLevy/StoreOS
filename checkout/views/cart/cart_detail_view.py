@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 
 from inventory.models import Item
 from ...forms import CartLineForm, TemporaryProductForm
@@ -23,6 +23,11 @@ def cart_detail(request, cart_id):
     persons = Person.objects.filter(company=company)
 
     if request.method == 'POST':
+        if cart.is_completed:
+            return HttpResponseForbidden(
+                "No se puede modificar un carrito finalizado."
+            )
+
         hide = request.POST.get('hide', 'false')
         deferred_price = request.POST.get('deferred_price', 'false')
 
@@ -144,6 +149,7 @@ def cart_detail(request, cart_id):
     return render(request, 'checkout/cart_detail.html', {
         'form': form,
         'cart_lines': cart_lines,
+        'cart_payments': cart.payments.select_related('payment_method'),
         'cart': cart,
         'total_general': total_general,
         'payment_methods': payment_methods,
